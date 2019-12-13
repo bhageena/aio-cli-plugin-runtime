@@ -18,6 +18,7 @@ const debug = createDebug('aio-cli-plugin-runtime')
 const http = require('http')
 const runtimeLib = require('@adobe/aio-lib-runtime')
 const config = require('@adobe/aio-lib-core-config')
+const { cli } = require('cli-ux')
 
 class RuntimeBaseCommand extends Command {
   async getOptions () {
@@ -112,6 +113,10 @@ class RuntimeBaseCommand extends Command {
       msg = msg + '\n specify --verbose flag for more information'
     }
     return this.error(msg)
+  }
+
+  table (data, columns, options = {}) {
+    cli.table(data, columns, options)
   }
 
   logJSON (msg, obj) {

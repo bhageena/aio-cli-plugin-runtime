@@ -11,7 +11,6 @@ governing permissions and limitations under the License.
 
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 class RuleList extends RuntimeBaseCommand {
   async run () {
@@ -50,7 +49,7 @@ class RuleList extends RuntimeBaseCommand {
               get: row => `${row.status}`
             }
           }
-          cli.table(resultsWithStatus, columns)
+          this.table(resultsWithStatus, columns)
         }
       })
       return p
