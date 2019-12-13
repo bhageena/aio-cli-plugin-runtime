@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 const decorators = require('../../../decorators').decorators()
 const statusStrings = ['success', 'error', `error${decorators.collision}`, 'syserr']
 
@@ -188,7 +187,7 @@ class ActivationList extends RuntimeBaseCommand {
           }
         }
         if (listActivation) {
-          cli.table(listActivation, columns, {
+          this.table(listActivation, columns, {
             'no-truncate': true
           })
         }

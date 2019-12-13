@@ -14,7 +14,6 @@ const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { parsePackageName } = require('@adobe/aio-lib-runtime').utils
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 const decorators = require('../../../decorators').decorators()
 
 class ActionList extends RuntimeBaseCommand {
@@ -87,7 +86,7 @@ class ActionList extends RuntimeBaseCommand {
             }
           }
         }
-        cli.table(result, columns)
+        this.table(result, columns)
       }
     } catch (err) {
       this.handleError('failed to list the actions', err)
