@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 class PackageList extends RuntimeBaseCommand {
   async run () {
@@ -79,7 +78,7 @@ class PackageList extends RuntimeBaseCommand {
             get: row => row.name
           }
         }
-        cli.table(result, columns)
+        this.table(result, columns)
       }
     } catch (err) {
       this.handleError('failed to list the packages', err)

@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 class TriggerList extends RuntimeBaseCommand {
   async run () {
@@ -85,7 +84,7 @@ class TriggerList extends RuntimeBaseCommand {
               get: row => row.name
             }
           }
-          cli.table(resultsWithStatus, columns)
+          this.table(resultsWithStatus, columns)
         }
       })
     } catch (err) {
