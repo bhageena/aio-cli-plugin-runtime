@@ -12,7 +12,6 @@ governing permissions and limitations under the License.
 
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 class NamespaceList extends RuntimeBaseCommand {
   async run () {
@@ -30,7 +29,7 @@ class NamespaceList extends RuntimeBaseCommand {
             get: row => row
           }
         }
-        cli.table(result, columns)
+        this.table(result, columns)
       }
     } catch (err) {
       this.handleError('failed to list namespaces', err)

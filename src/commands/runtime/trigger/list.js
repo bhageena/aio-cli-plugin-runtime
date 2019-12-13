@@ -12,7 +12,6 @@ governing permissions and limitations under the License.
 
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 class TriggerList extends RuntimeBaseCommand {
   async run () {
@@ -47,7 +46,7 @@ class TriggerList extends RuntimeBaseCommand {
             get: row => `${row.publish === false ? 'private' : 'public'}`
           }
         }
-        cli.table(result, columns)
+        this.table(result, columns)
       }
     } catch (err) {
       this.handleError('failed to list triggers', err)

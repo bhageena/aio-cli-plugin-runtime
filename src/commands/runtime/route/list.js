@@ -11,7 +11,6 @@ governing permissions and limitations under the License.
 
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 function processApi (api) {
   const data = []
@@ -66,7 +65,7 @@ class RouteList extends RuntimeBaseCommand {
           }, data)
         })
 
-        cli.table(data, {
+        this.table(data, {
           Action: { minWidth: 10 },
           Verb: { minWidth: 10 },
           APIName: { header: 'API Name', minWidth: 10 },
