@@ -12,7 +12,6 @@ governing permissions and limitations under the License.
 
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 class ActivationList extends RuntimeBaseCommand {
   async run () {
@@ -112,7 +111,7 @@ class ActivationList extends RuntimeBaseCommand {
           }
         }
         if (listActivation) {
-          cli.table(listActivation, columns, {
+          this.table(listActivation, columns, {
             'no-truncate': true
           })
         }
