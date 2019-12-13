@@ -12,7 +12,6 @@ governing permissions and limitations under the License.
 
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const { cli } = require('cli-ux')
 
 function createColumns (columnName) {
   return {
@@ -78,10 +77,10 @@ class NamespaceGet extends RuntimeBaseCommand {
       } else {
         this.log('Entities in namespace:')
 
-        cli.table(data.packages, createColumns('packages'))
-        cli.table(data.actions, createColumns('actions'))
-        cli.table(data.triggers, createColumns('triggers'))
-        cli.table(data.rules, createColumns('rules'))
+        this.table(data.packages, createColumns('packages'))
+        this.table(data.actions, createColumns('actions'))
+        this.table(data.triggers, createColumns('triggers'))
+        this.table(data.rules, createColumns('rules'))
       }
     } catch (err) {
       this.handleError('failed to get the data for a namespace', err)
