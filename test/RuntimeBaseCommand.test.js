@@ -10,15 +10,25 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const TheCommand = require('../src/RuntimeBaseCommand.js')
 const { Command } = require('@oclif/command')
-const { PropertyEnv } = require('../src/properties')
+const Properties = require('../src/properties')
+const PropertyEnv = Properties.PropertyEnv
+
+const propertiesFileNormal = Properties.propertiesFile
+let THROW_EXCEPTION_IN_PROPERTIES_FILE = false
+Properties.propertiesFile = jest.fn().mockImplementation(() => {
+  if (!THROW_EXCEPTION_IN_PROPERTIES_FILE) return propertiesFileNormal()
+  else throw new Error('Intentional Error')
+})
+
+const TheCommand = require('../src/RuntimeBaseCommand.js')
 const RuntimeLib = require('@adobe/aio-lib-runtime')
 const OpenWhiskError = require('openwhisk/lib/openwhisk_error')
 const { stdout } = require('stdout-stderr')
 
 beforeEach(() => {
   fakeFileSystem.reset()
+  THROW_EXCEPTION_IN_PROPERTIES_FILE = false
 })
 
 test('exports', async () => {
@@ -341,6 +351,26 @@ describe('instance methods', () => {
       command.handleError('msg', new Error(''))
       expect(command.error).toHaveBeenCalledWith('msg' + suffix)
     })
+  })
+
+  test('allow getProperties to not fail when fs is not available', async () => {
+    const files = {}
+    files[require('path').join(require('os').homedir(), '.wskprops')] = 'AUTH=x1234'
+    fakeFileSystem.addJson(files)
+
+    const options = await command.getOptions()
+    expect(options).toEqual({
+      api_key: 'x1234',
+      apihost: 'https://adobeioruntime.net',
+      apiversion: 'v1'
+    })
+
+    THROW_EXCEPTION_IN_PROPERTIES_FILE = true
+    return command.getOptions()
+      .then(() => expect(false).toEqual('did not throw error'))
+      .catch((e) => {
+        expect(e).toEqual(new Error('An AUTH key must be specified'))
+      })
   })
 
   test('optionally nullify namespace', async () => {
