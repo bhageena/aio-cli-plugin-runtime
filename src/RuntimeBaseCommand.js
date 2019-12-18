@@ -24,7 +24,11 @@ let cli
 class RuntimeBaseCommand extends Command {
   async getOptions () {
     const { flags } = this.parse(this.constructor)
-    const properties = propertiesFile()
+    let properties = { get: () => null }
+    try {
+      // propertiesFile() will fail in a browser; that's ok
+      properties = propertiesFile()
+    } catch (e) {}
 
     const options = {
       cert: flags.cert || config.get('runtime.cert') || properties.get('CERT'),
