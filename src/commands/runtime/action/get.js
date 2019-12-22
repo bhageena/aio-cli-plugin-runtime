@@ -61,6 +61,8 @@ class ActionGet extends RuntimeBaseCommand {
             const saveFileName = bSaveFile ? flags['save-as'] : `${result.name}${extension}`
             fs.writeFileSync(saveFileName, result.exec.code)
           }
+        } else if (ActionGet.fullGet) {
+          this.logJSON('', result)
         } else {
           // destructure getAction to remove the exec.code
           this.logJSON(`${result.name}\n`, { ...result,
@@ -75,6 +77,8 @@ class ActionGet extends RuntimeBaseCommand {
     }
   }
 }
+
+ActionGet.fullGet = false
 
 ActionGet.args = [
   {
