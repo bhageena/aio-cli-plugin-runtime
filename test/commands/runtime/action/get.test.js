@@ -257,5 +257,17 @@ describe('instance methods', () => {
             bufferData, 'buffer')
         })
     })
+
+    test('retrieve an action and do not omit code', () => {
+      TheCommand.fullGet = true
+      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/get.json')
+      command.argv = ['hello']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith('hello')
+          expect(stdout.output).toMatchFixture('action/get.json')
+        })
+        .finally(() => { TheCommand.fullGet = false })
+    })
   })
 })
