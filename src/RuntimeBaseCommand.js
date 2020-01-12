@@ -17,6 +17,7 @@ const createDebug = require('debug')
 const debug = createDebug('aio-cli-plugin-runtime')
 const http = require('http')
 const OpenWhisk = require('openwhisk')
+const OpenWhiskRoutes = require('openwhisk/lib/routes')
 
 let cli
 
@@ -73,7 +74,13 @@ class RuntimeBaseCommand extends Command {
     if (!options) {
       options = await this.getOptions()
     }
-    return OpenWhisk(options)
+
+    const ow = OpenWhisk(options)
+    // override api endpoint for apigateway
+    ow.routes = new OpenWhiskRoutes(ow.routes.client, (path) => {
+      return `web/whisk-system/apimgmt/${path}`
+    })
+    return ow
   }
 
   async init () {
