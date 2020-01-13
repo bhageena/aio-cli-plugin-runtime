@@ -30,14 +30,16 @@ class RuntimeBaseCommand extends Command {
       properties = propertiesFile()
     } catch (e) {}
 
+    const getEnv = (key) => process.env['AIO_RUNTIME_' + key]
+
     const options = {
-      cert: flags.cert || config.get('runtime.cert') || properties.get('CERT'),
-      key: flags.key || config.get('runtime.key') || properties.get('KEY'),
-      apiversion: flags.apiversion || config.get('runtime.apiversion') || properties.get('APIVERSION') || PropertyDefault.APIVERSION,
-      apihost: flags.apihost || config.get('runtime.apihost') || properties.get('APIHOST') || PropertyDefault.APIHOST,
-      namespace: config.get('runtime.namespace') || properties.get('NAMESPACE'),
-      api_key: flags.auth || config.get('runtime.auth') || properties.get('AUTH'),
-      ignore_certs: flags.insecure || config.get('runtime.insecure')
+      cert: flags.cert || getEnv('CERT') || properties.get('CERT'),
+      key: flags.key || getEnv('KEY') || properties.get('KEY'),
+      apiversion: flags.apiversion || getEnv('APIVERSION') || properties.get('APIVERSION') || PropertyDefault.APIVERSION,
+      apihost: flags.apihost || getEnv('APIHOST') || properties.get('APIHOST') || PropertyDefault.APIHOST,
+      namespace: getEnv('NAMESPACE') || properties.get('NAMESPACE'),
+      api_key: flags.auth || getEnv('AUTH') || properties.get('AUTH'),
+      ignore_certs: flags.insecure || getEnv('INSECURE')
     }
 
     // remove any null or undefined keys

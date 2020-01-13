@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 const fs = require('fs')
 const path = require('path')
 const PropertiesReader = require('properties-reader')
-const config = require('@adobe/aio-lib-core-config')
 
 const PropertyKey = {
   AUTH: 'AUTH',
@@ -44,7 +43,7 @@ const PropertyDefault = {
 
 function propertiesFile () {
   let properties = { get: () => null }
-  const wskConfigFile = process.env[PropertyEnv.CONFIG_FILE] || config.get('runtime.config_file') || PropertyDefault.CONFIG_FILE
+  const wskConfigFile = process.env[PropertyEnv.CONFIG_FILE] || PropertyDefault.CONFIG_FILE
 
   if (fs.existsSync(wskConfigFile)) {
     properties = PropertiesReader(wskConfigFile)
