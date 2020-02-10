@@ -51,6 +51,10 @@ class RouteList extends RuntimeBaseCommand {
         limit: flags.limit
       }
 
+      // delete any undefined properties because the backend API will interpet
+      // the query string incorrectly as "undefined" instead of JavaScript undefined.
+      Object.keys(options).forEach(_ => options[_] === undefined && delete options[_])
+
       const result = await ow.routes.list(options)
 
       if (flags.json) {
