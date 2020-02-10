@@ -25,6 +25,10 @@ class RouteDelete extends RuntimeBaseCommand {
         operation: args.apiVerb
       }
 
+      // delete any undefined properties because the backend API will interpet
+      // the query string incorrectly as "undefined" instead of JavaScript undefined.
+      Object.keys(options).forEach(_ => options[_] === undefined && delete options[_])
+
       await ow.routes.delete(options)
     } catch (err) {
       this.handleError('failed to delete the api', err)
