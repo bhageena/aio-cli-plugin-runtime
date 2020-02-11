@@ -24,7 +24,11 @@ class RouteGet extends RuntimeBaseCommand {
       }
 
       const result = await ow.routes.get(options)
-      this.logJSON('', result.apis[0].value.apidoc)
+      if (result.apis.length === 1) {
+        this.logJSON('', result.apis[0].value.apidoc)
+      } else {
+        throw new Error(`API does not exist for basepath ${args.basePathOrApiName}`)
+      }
     } catch (err) {
       this.handleError('failed to get the api', err)
     }
