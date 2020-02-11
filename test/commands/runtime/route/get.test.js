@@ -83,5 +83,18 @@ describe('instance methods', () => {
           expect(stdout.output).toMatchFixture('route/get.txt')
         })
     })
+
+    test('get invalid api', () => {
+      return new Promise((resolve, reject) => {
+        const cmd = rtLib.mockResolved(rtAction, { apis: [] })
+        command.argv = ['/myapi']
+        return command.run()
+          .catch(() => {
+            expect(cmd).toHaveBeenCalledWith({ basepath: '/myapi' })
+            expect(handleError).toHaveBeenLastCalledWith('failed to get the api', new Error('API does not exist for basepath /myapi'))
+            resolve()
+          })
+      })
+    })
   })
 })
