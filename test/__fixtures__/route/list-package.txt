@@ -1,0 +1,2 @@
+Action                    Verb      API Name  Url                                                        
+/53444_41603/pkg1/action1 get       /myapi    https://runtime.adobe.io:443/apis/53444_41603/myapi/mypath 
