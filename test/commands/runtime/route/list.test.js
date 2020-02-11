@@ -104,6 +104,22 @@ describe('instance methods', () => {
         })
     })
 
+    test('api list for action in default package', () => {
+      rtLib.mockResolvedFixture(rtAction, 'route/list.json')
+      return command.run()
+        .then(() => {
+          expect(stdout.output).toMatchFixture('route/list-no-package.txt')
+        })
+    })
+
+    test('api list for action in a package', () => {
+      rtLib.mockResolvedFixture(rtAction, 'route/list-package.json')
+      return command.run()
+        .then(() => {
+          expect(stdout.output).toMatchFixture('route/list-package.txt')
+        })
+    })
+
     test('error, throws exception', () => {
       return new Promise((resolve, reject) => {
         rtLib.mockRejected(rtAction, new Error('an error'))
