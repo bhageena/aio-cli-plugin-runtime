@@ -12,7 +12,7 @@
               "openwhisk": {},
               "/mypath": {
                 "get": {
-                  "operationId": "53444_41603/default/action1.json",
+                  "operationId": "53444_41603/pkg1/action1.json",
                   "responses": {
                     "default": {
                       "description": "Default response"
@@ -21,7 +21,7 @@
                   "x-openwhisk": {
                     "action": "action1",
                     "namespace": "53444_41603",
-                    "package": "default",
+                    "package": "pkg1",
                     "url": "not-used"
                   }
                 }
