@@ -24,9 +24,11 @@ function processApi (api) {
     const path = paths[key]
     Object.keys(path).forEach(verb => {
       const operation = path[verb]
+      const xopenwhisk = operation['x-openwhisk']
       const item = {}
+      const packageName = xopenwhisk.package !== '' && xopenwhisk.package !== 'default' ? `/${xopenwhisk.package}` : ''
 
-      item.Action = `/${operation.operationId}`
+      item.Action = `/${xopenwhisk.namespace}${packageName}/${xopenwhisk.action}`
       item.Verb = verb
       item.APIName = api.value.apidoc.basePath
       item.URL = `${api.value.gwApiUrl}${key}`
