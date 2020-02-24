@@ -189,8 +189,7 @@ OPTIONS
 
   --debug=debug                          Debug level output
 
-  --docker=docker                        [Restricted Access] use provided Docker image (a path on DockerHub) to run the
-                                         action
+  --docker=docker                        use provided Docker image (a path on DockerHub) to run the action
 
   --help                                 Show help
 
