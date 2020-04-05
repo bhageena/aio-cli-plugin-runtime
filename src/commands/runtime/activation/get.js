@@ -20,7 +20,9 @@ class ActivationGet extends RuntimeBaseCommand {
     try {
       const ow = await this.wsk()
       if (flags.last) {
-        const ax = await ow.activations.list({ limit: 1, skip: 0 })
+        const options = { limit: 1, skip: 0 }
+        if (flags.filter) options.name = flags.filter
+        const ax = await ow.activations.list(options)
         if (ax && ax.length > 0) {
           id = ax[0].activationId
         } else {
@@ -60,6 +62,10 @@ ActivationGet.flags = {
   logs: flags.boolean({
     char: 'g',
     description: 'emit only the logs, stripped of time stamps and stream identifier'
+  }),
+  filter: flags.string({
+    char: 'f',
+    description: 'the name of the activations to filter on (this flag may only be used with --last)'
   })
 }
 

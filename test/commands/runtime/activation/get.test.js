@@ -48,6 +48,11 @@ test('flags', async () => {
   expect(logsFlag).toBeDefined()
   expect(logsFlag.description).toBeDefined()
   expect(logsFlag.char).toBe('g')
+
+  const filterFlag = TheCommand.flags.filter
+  expect(filterFlag).toBeDefined()
+  expect(filterFlag.description).toBeDefined()
+  expect(filterFlag.char).toBe('f')
 })
 
 describe('instance methods', () => {
@@ -92,7 +97,19 @@ describe('instance methods', () => {
       command.argv = ['--last']
       return command.run()
         .then(() => {
-          expect(axList).toHaveBeenCalled()
+          expect(axList).toHaveBeenCalledWith({ limit: 1, skip: 0 })
+          expect(axGet).toHaveBeenCalledWith('12345')
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('retrieve last activation --last and --filter', () => {
+      const axList = ow.mockResolved('activations.list', [{ activationId: '12345' }])
+      const axGet = ow.mockResolved(owAction, '')
+      command.argv = ['--last', '--filter', 'foo']
+      return command.run()
+        .then(() => {
+          expect(axList).toHaveBeenCalledWith({ limit: 1, skip: 0, name: 'foo' })
           expect(axGet).toHaveBeenCalledWith('12345')
           expect(stdout.output).toMatch('')
         })
