@@ -34,7 +34,7 @@ test('aliases', async () => {
 test('args', async () => {
   const logName = TheCommand.args[0]
   expect(logName.name).toBeDefined()
-  expect(logName.name).toEqual('activationID')
+  expect(logName.name).toEqual('activationId')
 })
 
 test('flags', async () => {
@@ -42,6 +42,14 @@ test('flags', async () => {
   expect(flag).toBeDefined()
   expect(flag.description).toBeDefined()
   expect(flag.char).toBe('l')
+  const count = TheCommand.flags.count
+  expect(count).toBeDefined()
+  expect(count.description).toBeDefined()
+  expect(count.char).toBe('c')
+  const filter = TheCommand.flags.filter
+  expect(filter).toBeDefined()
+  expect(filter.description).toBeDefined()
+  expect(filter.char).toBe('f')
 })
 
 describe('instance methods', () => {
@@ -81,10 +89,49 @@ describe('instance methods', () => {
         })
     })
 
+    test('retrieve last activation results --last --count', () => {
+      const axList = ow.mockResolved('activations.list', [
+        { activationId: '12' },
+        { activationId: '34' }
+      ])
+      const axGet = ow.mockResolved(owAction, '')
+      command.argv = ['--last', '--count', '2']
+      return command.run()
+        .then(() => {
+          expect(axList).toHaveBeenCalledWith({ limit: 2, skip: 0 })
+          expect(axGet).toHaveBeenCalledWith('12')
+          expect(axGet).toHaveBeenCalledWith('34')
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('retrieve last activation results --last --count --filter', () => {
+      const axList = ow.mockResolved('activations.list', [
+        { activationId: '12' },
+        { activationId: '34' }
+      ])
+      const axGet = ow.mockResolved(owAction, '')
+      command.argv = ['--last', '--count', '2', '--filter', 'f/g']
+      return command.run()
+        .then(() => {
+          expect(axList).toHaveBeenCalledWith({ limit: 2, skip: 0, name: 'f/g' })
+          expect(axGet).toHaveBeenCalledWith('12')
+          expect(axGet).toHaveBeenCalledWith('34')
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('map status code to string', () => {
+      expect(TheCommand.statusToString(0)).toMatch('success')
+      expect(TheCommand.statusToString(1)).toMatch('application error')
+      expect(TheCommand.statusToString(2)).toMatch('developer error')
+      expect(TheCommand.statusToString(3)).toMatch('system error')
+    })
+
     test('should fail on get activation result w/ noflag, no activationId', async () => {
       const runResult = command.run()
       await expect(runResult instanceof Promise).toBeTruthy()
-      await expect(runResult).rejects.toThrow('failed to fetch activation result')
+      await expect(runResult).rejects.toThrow('Missing required arg: `activationId`')
     })
 
     test('errors out on api error', () => {
@@ -94,7 +141,7 @@ describe('instance methods', () => {
         return command.run()
           .then(() => reject(new Error('does not throw error')))
           .catch(() => {
-            expect(handleError).toHaveBeenLastCalledWith('failed to fetch activation result', new Error('an error'))
+            expect(handleError).toHaveBeenLastCalledWith('failed to retrieve results for activation', new Error('an error'))
             resolve()
           })
       })
