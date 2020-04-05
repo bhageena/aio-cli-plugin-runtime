@@ -90,7 +90,11 @@ module.exports = {
   init,
   printActionLogs,
   mockReset: () => {
-    Object.values(mockRtUtils).forEach(v => v.mockReset())
+    Object.values(mockRtUtils).forEach(v => {
+      if (v.mockReset) {
+        v.mockReset()
+      }
+    })
     init.mockClear()
     // mock reset for instance too ?
   }

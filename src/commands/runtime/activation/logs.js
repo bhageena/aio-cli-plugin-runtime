@@ -15,6 +15,7 @@ const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const rtLib = require('@adobe/aio-lib-runtime')
 const printLogs = rtLib.utils.printLogs
 const ActivationListLimits = require('./list').limits
+const { makeBanner } = require('../../../banner')
 
 class ActivationLogs extends RuntimeBaseCommand {
   async run () {
@@ -58,7 +59,8 @@ class ActivationLogs extends RuntimeBaseCommand {
         filterActions.push(flags.action)
       }
 
-      await rtLib.printActionLogs({ ow: owOptions }, this.log, limit, filterActions, flags.strip, flags.poll || flags.tail || flags.watch)
+      const bannerFunc = (a, l) => makeBanner(this.log, a, l)
+      await rtLib.printActionLogs({ ow: owOptions }, { logFunc: this.log, bannerFunc }, limit, filterActions, flags.strip, flags.poll || flags.tail || flags.watch)
     } else {
       const logger = this.log
       return ow.activations.logs(args.activationId).then((result) => {
