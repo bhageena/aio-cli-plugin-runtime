@@ -12,11 +12,12 @@ governing permissions and limitations under the License.
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { printLogs } = require('@adobe/aio-lib-runtime').utils
+const chalk = require('chalk')
 
 class ActivationGet extends RuntimeBaseCommand {
   async run () {
     const { args, flags } = this.parse(ActivationGet)
-    let id = args.activationID
+    let id = args.activationId
     try {
       const ow = await this.wsk()
       if (flags.last) {
@@ -28,12 +29,12 @@ class ActivationGet extends RuntimeBaseCommand {
         }
       }
       if (!id) {
-        this.error('missing required argument activationID')
+        this.error('Missing required arg: `activationId`')
       }
 
       if (flags.logs) {
-        this.log('activation logs %s', id)
         const result = await ow.activations.logs(id)
+        this.log(chalk.dim('=== ') + chalk.bold('activation logs %s %s'), id, flags.filter || '')
         printLogs(result, true, this.log)
       } else {
         const result = await ow.activations.get(id)
@@ -47,7 +48,7 @@ class ActivationGet extends RuntimeBaseCommand {
 
 ActivationGet.args = [
   {
-    name: 'activationID'
+    name: 'activationId'
   }
 ]
 
