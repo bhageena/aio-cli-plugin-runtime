@@ -38,11 +38,14 @@ test('flags', async () => {
   expect(typeof TheCommand.flags.param).toBe('object')
   expect(TheCommand.flags['param-file'].char).toBe('P')
   expect(typeof TheCommand.flags['param-file']).toBe('object')
-  expect(TheCommand.flags.blocking.char).toBe('b')
-  expect(TheCommand.flags.blocking.default).toBe(false)
-  expect(typeof TheCommand.flags.blocking).toBe('object')
+  expect(TheCommand.flags.full.char).toBe('f')
+  expect(TheCommand.flags.full.default).toBe(false)
+  expect(TheCommand.flags['no-wait'].default).toBe(false)
+  expect(TheCommand.flags['no-wait'].char).toBe('n')
+  expect(typeof TheCommand.flags['no-wait']).toBe('object')
   expect(TheCommand.flags.result.char).toBe('r')
-  expect(TheCommand.flags.result.default).toBe(false)
+  expect(TheCommand.flags.result.default).toBe(true)
+  expect(TheCommand.flags.result.hidden).toBe(true)
   expect(typeof TheCommand.flags.result).toBe('object')
 })
 
@@ -82,9 +85,9 @@ describe('instance methods', () => {
         .then(() => {
           expect(cmd).toHaveBeenCalledWith(expect.objectContaining({
             name: 'hello',
-            blocking: false,
+            blocking: true,
             params: {},
-            result: false
+            result: true
           }))
           expect(stdout.output).toMatch('')
         })
@@ -105,15 +108,15 @@ describe('instance methods', () => {
     test('invokes an action with action name and params', () => {
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
       command.argv = ['hello', '--param', 'a', 'b', 'c', 'd']
-      rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ fakeParam: 'aaa' })
+      rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ a: 'b', c: 'd' })
       return command.run()
         .then(() => {
           expect(rtUtils.getKeyValueObjectFromMergedParameters).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], undefined)
           expect(cmd).toHaveBeenCalledWith(expect.objectContaining({
             name: 'hello',
-            params: { fakeParam: 'aaa' },
-            blocking: false,
-            result: false
+            params: { a: 'b', c: 'd' },
+            blocking: true,
+            result: true
           }))
           expect(stdout.output).toMatch('')
         })
@@ -121,14 +124,14 @@ describe('instance methods', () => {
 
     test('invokes an action with action name, params and blocking', () => {
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
-      command.argv = ['hello', '--param', 'a', 'b', '--param', 'c', 'd', '--blocking']
-      rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ fakeParam: 'aaa' })
+      command.argv = ['hello', '--param', 'a', 'b', '--param', 'c', 'd', '--full']
+      rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ a: 'b', c: 'd' })
       return command.run()
         .then(() => {
           expect(rtUtils.getKeyValueObjectFromMergedParameters).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], undefined)
           expect(cmd).toHaveBeenCalledWith(expect.objectContaining({
             name: 'hello',
-            params: { fakeParam: 'aaa' },
+            params: { a: 'b', c: 'd' },
             blocking: true,
             result: false
           }))
@@ -155,7 +158,7 @@ describe('instance methods', () => {
     test('invokes an action with action name, and gets an activation id', () => {
       const result = { activationId: '123456' }
       const cmd = rtLib.mockResolved(rtAction, result)
-      command.argv = ['hello']
+      command.argv = ['hello', '--no-wait']
       rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({})
       return command.run()
         .then(() => {
@@ -169,10 +172,10 @@ describe('instance methods', () => {
         })
     })
 
-    test('invokes an action with action name and --blocking, and gets an activation record as the response', () => {
+    test('invokes an action with action name and --full, and gets an activation record as the response', () => {
       const result = { activationId: '123456', response: { result: { msg: '123456' } } }
       const cmd = rtLib.mockResolved(rtAction, result)
-      command.argv = ['hello', '--blocking']
+      command.argv = ['hello', '--full']
       rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({})
       return command.run()
         .then(() => {
@@ -203,11 +206,11 @@ describe('instance methods', () => {
         })
     })
 
-    test('invokes an action with action name and --blocking but activation is demoted to async', () => {
+    test('invokes an action with action name and --full but activation is demoted to async', () => {
       // when the API returns with 202 it demoted the activation to async request, providing only an activation id
       const result = { activationId: '123456' }
       const cmd = rtLib.mockRejected(rtAction, result)
-      command.argv = ['hello', '--blocking']
+      command.argv = ['hello', '--full']
       rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({})
       return command.run()
         .then(() => {
@@ -241,12 +244,12 @@ describe('instance methods', () => {
         })
     })
 
-    test('invokes an action with action name and --blocking, and gets an activation record where the result is an error (API status code is 502)', () => {
+    test('invokes an action with action name and --full, and gets an activation record where the result is an error (API status code is 502)', () => {
       // when the API returns with 502 due to an application error in the function
       // the result is the entire activation wrapped in an error object
       const result = { activationId: '123456', response: { result: { error: 'oops' } } }
       const cmd = rtLib.mockRejected(rtAction, { error: result })
-      command.argv = ['hello', '--blocking']
+      command.argv = ['hello', '--full']
       rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({})
       return command.run()
         .then(() => {
@@ -282,26 +285,44 @@ describe('instance methods', () => {
         })
     })
 
-    test('invokes an action with all flags', () => {
+    test('invokes an action with blocking and result flags', () => {
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
-      command.argv = ['hello', '--param', 'a', 'b', '--param', 'c', 'd', '--blocking', '--result']
-      rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ fakeParam: 'aaa' })
+      command.argv = ['hello', '--param', 'a', 'b', '--param', 'c', 'd', '--full', '--result']
+      rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ a: 'b', c: 'd' })
       return command.run()
         .then(() => {
           expect(rtUtils.getKeyValueObjectFromMergedParameters).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], undefined)
           expect(cmd).toHaveBeenCalledWith(expect.objectContaining({
             name: 'hello',
-            params: { fakeParam: 'aaa' },
+            params: { a: 'b', c: 'd' },
             blocking: true,
-            result: true
+            result: false, // when full flag is set, it overrides
+            headers: expect.objectContaining({ 'X-OW-EXTRA-LOGGING': 'on' })
           }))
           expect(stdout.output).toMatch('')
         })
     })
 
-    test('invokes an action with all flags and --param-file', () => {
+    test('invokes an action with blocking and result and async flags', () => {
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
-      command.argv = ['hello', '--param-file', '/action/parameters.json', '--blocking', '--result']
+      command.argv = ['hello', '--param', 'a', 'b', '--param', 'c', 'd', '--full', '--result', '--no-wait']
+      rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ a: 'b', c: 'd' })
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith({
+            name: 'hello',
+            params: { a: 'b', c: 'd' },
+            blocking: false, // when no-wait flag is set, it overrides
+            result: false, // when no-wait flag is set, it overrides
+            headers: expect.objectContaining({ 'X-OW-EXTRA-LOGGING': 'on' })
+          })
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('invokes an action with blocking and result flags and --param-file', () => {
+      const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
+      command.argv = ['hello', '--param-file', '/action/parameters.json', '--full', '--result']
       rtUtils.getKeyValueObjectFromMergedParameters.mockReturnValue({ fakeParam: 'aaa' })
       return command.run()
         .then(() => {
@@ -310,7 +331,7 @@ describe('instance methods', () => {
             name: 'hello',
             params: { fakeParam: 'aaa' },
             blocking: true,
-            result: true
+            result: false // when full flag is set, it overrides
           }))
           expect(stdout.output).toMatch('')
         })
@@ -320,7 +341,7 @@ describe('instance methods', () => {
       return new Promise((resolve, reject) => {
         rtLib.mockRejected(rtAction, 'not that one')
         rtUtils.getKeyValueObjectFromMergedParameters.mockImplementation(() => { throw new Error('that is a parsing error') })
-        command.argv = ['hello', '--param', 'a', 'b', 'c', '--blocking']
+        command.argv = ['hello', '--param', 'a', 'b', 'c', '--full']
         return command.run()
           .then(() => reject(new Error('does not throw error')))
           .catch(() => {
