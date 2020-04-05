@@ -12,40 +12,78 @@ governing permissions and limitations under the License.
 
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
+const ActivationListLimits = require('./list').limits
+const chalk = require('chalk')
 
 class ActivationResult extends RuntimeBaseCommand {
   async run () {
     const { args, flags } = this.parse(ActivationResult)
-    let id = args.activationID
-    try {
-      const ow = await this.wsk()
-      if (flags.last) {
-        const ax = await ow.activations.list({ limit: 1, skip: 0 })
-        id = ax[0].activationId
-      }
-      if (!id) {
-        this.error('missing required argument activationID')
-      }
+    // note: could be null, but we wait to check
+    let activations = [{ activationId: args.activationId }]
+    const ow = await this.wsk()
+    const filter = flags.action
+    const limit = Math.max(1, Math.min(flags.limit, ActivationListLimits.max))
+    const options = { limit, skip: flags.skip }
 
-      const result = await ow.activations.result(id)
-      this.logJSON('', result)
-    } catch (err) {
-      this.handleError('failed to fetch activation result', err)
+    if (!args.activationId) {
+      if (filter) {
+        options.name = filter
+      }
+      activations = await ow.activations.list(options)
     }
+
+    const logger = this.log
+    await Promise.all(activations.map((ax) => {
+      return ow.activations.result(ax.activationId).then((result) => {
+        if (flags.last && limit > 1) {
+          logger(chalk.dim('=== ') + chalk.bold('activation result %s %s:%s (%s) %s'), ax.activationId, ax.name || '', ax.version || '', ActivationResult.statusToString(ax.statusCode), new Date(ax.end).toLocaleString())
+        }
+        this.logJSON('', result.result)
+      }, (err) => {
+        this.handleError('failed to retrieve results for activation', err)
+      })
+    }))
+  }
+}
+
+ActivationResult.statusToString = (status) => {
+  switch (status) {
+    case 0: return 'success'
+    case 1: return 'application error'
+    case 2: return 'developer error'
+    default: return 'system error'
   }
 }
 
 ActivationResult.args = [
   {
-    name: 'activationID'
+    name: 'activationId'
   }
 ]
+
+ActivationResult.limits = {
+  max: 200
+}
 
 ActivationResult.flags = {
   ...RuntimeBaseCommand.flags,
   last: flags.boolean({
     char: 'l',
-    description: 'retrieves the most recent activation result'
+    description: 'Fetch the most recent activation result (default)'
+  }),
+  limit: flags.integer({
+    char: 'n',
+    description: `Fetch the last LIMIT activation results (up to ${ActivationListLimits.max})`,
+    default: 1
+  }),
+  skip: flags.integer({
+    char: 's',
+    description: 'SKIP number of activations',
+    default: 0
+  }),
+  action: flags.string({
+    description: 'Fetch results for a specific action',
+    char: 'a'
   })
 }
 
