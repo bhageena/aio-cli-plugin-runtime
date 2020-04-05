@@ -14,19 +14,13 @@ const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const rtLib = require('@adobe/aio-lib-runtime')
 const printLogs = rtLib.utils.printLogs
-const chalk = require('chalk')
+const ActivationListLimits = require('./list').limits
 
 class ActivationLogs extends RuntimeBaseCommand {
   async run () {
     const { args, flags } = this.parse(ActivationLogs)
     const ow = await this.wsk()
-
-    let limit = 1
-    if (flags.last) {
-      limit = 1
-    } else if (flags.limit) {
-      limit = Math.min(flags.limit, 50)
-    }
+    const limit = Math.max(1, Math.min(flags.limit, ActivationListLimits.max))
 
     if (!args.activationId) {
       const owOptions = await this.getOptions()
@@ -68,7 +62,6 @@ class ActivationLogs extends RuntimeBaseCommand {
     } else {
       const logger = this.log
       return ow.activations.logs(args.activationId).then((result) => {
-        logger(chalk.dim('=== ') + chalk.bold('activation logs %s'), args.activationId)
         printLogs(result, flags.strip, logger)
       }, (err) => {
         this.handleError('failed to retrieve logs for activation', err)
@@ -107,16 +100,22 @@ ActivationLogs.flags = {
   }),
   last: flags.boolean({
     char: 'l',
-    description: 'retrieves the most recent activation logs'
+    description: 'Fetch the most recent activation logs (default)'
   }),
+  limit: flags.integer({
+    char: 'n',
+    description: `Fetch the last LIMIT activation logs (up to ${ActivationListLimits.max})`,
+    default: 1
+  }), /* This needs a patch in rtLib.printActionLogs
+  skip: flags.integer({
+    char: 's',
+    description: 'SKIP number of activations',
+    default: 0
+  }), */
   strip: flags.boolean({
     char: 'r',
     description: 'strip timestamp information and output first line only',
     default: false
-  }),
-  limit: flags.integer({
-    description: 'return the last `limit` activation logs. Max 50',
-    exclusive: ['last']
   }),
   tail: flags.boolean({
     description: 'Fetch logs continuously',
