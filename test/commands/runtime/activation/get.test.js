@@ -35,7 +35,7 @@ test('aliases', async () => {
 test('args', async () => {
   const getName = TheCommand.args[0]
   expect(getName.name).toBeDefined()
-  expect(getName.name).toEqual('activationID')
+  expect(getName.name).toEqual('activationId')
 })
 
 test('flags', async () => {
@@ -48,6 +48,11 @@ test('flags', async () => {
   expect(logsFlag).toBeDefined()
   expect(logsFlag.description).toBeDefined()
   expect(logsFlag.char).toBe('g')
+
+  const filterFlag = TheCommand.flags.action
+  expect(filterFlag).toBeDefined()
+  expect(filterFlag.description).toBeDefined()
+  expect(filterFlag.char).toBe('a')
 })
 
 describe('instance methods', () => {
@@ -108,6 +113,18 @@ describe('instance methods', () => {
         })
     })
 
+    test('retrieve last activation --last and --action', () => {
+      const axList = rtLib.mockResolved('activations.list', [{ activationId: '12345' }])
+      const axGet = rtLib.mockResolved(rtAction, { start: 1569212581883 })
+      command.argv = ['--last', '--action', 'foo']
+      return command.run()
+        .then(() => {
+          expect(axList).toHaveBeenCalledWith({ limit: 1, skip: 0, name: 'foo' })
+          expect(axGet).toHaveBeenCalledWith('12345')
+          expect(stdout.output).toMatch('')
+        })
+    })
+
     test('retrieve last activation logs --last --logs', () => {
       const axList = rtLib.mockResolved('activations.list', [{ activationId: '12345' }])
       const axGet = rtLib.mockResolved('activations.logs', { logs: ['line1', 'line2', '2019-10-11T19:08:57.298Z  stdout: login-success'] })
@@ -127,10 +144,17 @@ describe('instance methods', () => {
       await expect(res).rejects.toThrow('no activations were returned')
     })
 
-    test('should fail on get activation w/ noflag, no activationId', async () => {
-      const runResult = command.run()
-      await expect(runResult instanceof Promise).toBeTruthy()
-      await expect(runResult).rejects.toThrow('failed to retrieve the activation')
+    test('should not fail on get activation w/ noflag, no activationId', async () => {
+      return new Promise((resolve, reject) => {
+        const axList = rtLib.mockResolved('activations.list', [])
+        return command.run()
+          .then(() => reject(new Error('does not throw error')))
+          .catch(() => {
+            expect(axList).toHaveBeenCalledWith({ limit: 1, skip: 0 })
+            expect(handleError).toHaveBeenLastCalledWith('failed to retrieve the activation', new Error('no activations were returned'))
+            resolve()
+          })
+      })
     })
 
     test('errors out on api error', () => {

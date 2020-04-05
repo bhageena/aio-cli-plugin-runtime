@@ -14,27 +14,36 @@ const moment = require('moment')
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { printLogs } = require('@adobe/aio-lib-runtime').utils
+const { makeBanner } = require('../../../banner')
 
 class ActivationGet extends RuntimeBaseCommand {
   async run () {
     const { args, flags } = this.parse(ActivationGet)
-    let id = args.activationID
+    const ow = await this.wsk()
+    const filter = flags.action
+    const options = { limit: 1, skip: flags.skip }
+    let id = args.activationId
+
     try {
-      const ow = await this.wsk()
-      if (flags.last) {
-        const ax = await ow.activations.list({ limit: 1, skip: 0 })
-        if (ax && ax.length > 0) {
-          id = ax[0].activationId
-        } else {
-          this.handleError('no activations were returned')
-        }
-      }
       if (!id) {
-        this.error('missing required argument activationID')
+        if (filter) {
+          options.name = filter
+        }
+
+        const activations = await ow.activations.list(options)
+        if (activations && activations.length > 0) {
+          const activation = activations[0]
+          id = activation.activationId
+
+          if (flags.last && !flags.quiet && (flags.logs || flags.result)) {
+            makeBanner(this.log, activation)
+          }
+        } else {
+          return this.handleError('no activations were returned')
+        }
       }
 
       if (flags.logs) {
-        this.log('activation logs %s', id)
         const result = await ow.activations.logs(id)
         printLogs(result, true, this.log)
       } else if (flags.result) {
@@ -54,7 +63,7 @@ class ActivationGet extends RuntimeBaseCommand {
 
 ActivationGet.args = [
   {
-    name: 'activationID'
+    name: 'activationId'
   }
 ]
 
@@ -62,15 +71,29 @@ ActivationGet.flags = {
   ...RuntimeBaseCommand.flags,
   last: flags.boolean({
     char: 'l',
-    description: 'retrieves the most recent activation'
+    description: 'Fetch the most recent activation (default)'
+  }),
+  skip: flags.integer({
+    char: 's',
+    description: 'SKIP number of activations',
+    default: 0
   }),
   logs: flags.boolean({
     char: 'g',
-    description: 'emit only the logs, stripped of time stamps and stream identifier'
+    description: 'Emit only the logs, stripped of time stamps and stream identifier'
   }),
   result: flags.boolean({
     char: 'r',
-    description: 'emit only the result'
+    description: 'Emit only the result'
+  }),
+  action: flags.string({
+    char: 'a',
+    description: 'Fetch logs for a specific action'
+  }),
+  quiet: flags.boolean({
+    char: 'q',
+    description: 'Suppress last activation information header',
+    dependsOn: ['last']
   })
 }
 
