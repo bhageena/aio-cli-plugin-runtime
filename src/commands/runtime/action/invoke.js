@@ -19,18 +19,22 @@ class ActionInvoke extends RuntimeBaseCommand {
     const { args, flags } = this.parse(ActionInvoke)
     const name = args.actionName
     let paramsAction = {}
+    const nowait = flags['no-wait']
+    const blocking = nowait === false
+    const result = flags.result === true && flags.full === false && nowait === false
+
     try {
       paramsAction = getKeyValueObjectFromMergedParameters(flags.param, flags['param-file'])
 
       const ow = await this.wsk()
-      const result = await ow.actions.invoke({
+      const actionResult = await ow.actions.invoke({
         name,
         params: paramsAction,
-        blocking: flags.blocking || flags.result,
-        result: flags.result,
+        blocking,
+        result,
         headers: { 'X-OW-EXTRA-LOGGING': 'on' }
       })
-      this.logJSON('', result)
+      this.logJSON('', actionResult)
     } catch (err) {
       // a blocking/result only invoke which errors produces a 502 http status code
       // and the promise will fail and enter this catch block due to the await above
@@ -39,9 +43,9 @@ class ActionInvoke extends RuntimeBaseCommand {
       // project the respose result if the result only flag is used.
       if (err.activationId) {
         this.log(`activation took too long, use activation id ${err.activationId} to check for completion.`)
-      } else if (flags.result && err.error && err.error.response && err.error.response.result) {
+      } else if (result && err.error && err.error.response && err.error.response.result) {
         this.logJSON('', err.error.response.result)
-      } else if (flags.blocking && err.error && err.error.activationId) {
+      } else if (blocking && err.error && err.error.activationId) {
         this.logJSON('', err.error)
       } else {
         this.handleError('failed to invoke the action', err)
@@ -68,15 +72,21 @@ ActionInvoke.flags = {
     char: 'P',
     description: 'FILE containing parameter values in JSON format' // help description for flag
   }),
-  blocking: flags.boolean({
-    char: 'b',
-    description: 'blocking invoke', // help description for flag
+  full: flags.boolean({
+    char: 'f',
+    description: 'wait for full activation record', // help description for flag
+    default: false
+  }),
+  'no-wait': flags.boolean({
+    char: 'n',
+    description: 'fire and forget (asynchronous invoke, does not wait for the result)', // help description for flag
     default: false
   }),
   result: flags.boolean({
     char: 'r',
-    description: 'blocking invoke; show only activation result (unless there is a failure)', // help description for flag
-    default: false
+    description: 'invoke action and wait for the result (default)', // help description for flag
+    default: true,
+    hidden: true
   })
 }
 ActionInvoke.description = 'Invokes an Action'
