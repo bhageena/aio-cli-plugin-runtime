@@ -120,13 +120,6 @@ describe('instance methods', () => {
         })
     })
 
-    test('map status code to string', () => {
-      expect(TheCommand.statusToString(0)).toMatch('success')
-      expect(TheCommand.statusToString(1)).toMatch('application error')
-      expect(TheCommand.statusToString(2)).toMatch('developer error')
-      expect(TheCommand.statusToString(3)).toMatch('system error')
-    })
-
     test('should not fail on get activation result w/ noflag, no activationId', () => {
       const axList = rtLib.mockResolved('activations.list', [])
       return command.run()

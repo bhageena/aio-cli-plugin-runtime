@@ -14,6 +14,7 @@ const moment = require('moment')
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { printLogs } = require('@adobe/aio-lib-runtime').utils
+const { makeBanner } = require('../../../banner')
 
 class ActivationGet extends RuntimeBaseCommand {
   async run () {
@@ -28,20 +29,21 @@ class ActivationGet extends RuntimeBaseCommand {
         if (filter) {
           options.name = filter
         }
-        const ax = await ow.activations.list(options)
-        if (ax && ax.length > 0) {
-          id = ax[0].activationId
+
+        const activations = await ow.activations.list(options)
+        if (activations && activations.length > 0) {
+          const activation = activations[0]
+          id = activation.activationId
+
+          if (flags.last && !flags.quiet && (flags.logs || flags.result)) {
+            makeBanner(this.log, activation)
+          }
         } else {
           return this.handleError('no activations were returned')
         }
       }
 
-      if (!id) {
-        this.error('missing required argument activationID')
-      }
-
       if (flags.logs) {
-        this.log('activation logs %s', id)
         const result = await ow.activations.logs(id)
         printLogs(result, true, this.log)
       } else if (flags.result) {
@@ -61,7 +63,7 @@ class ActivationGet extends RuntimeBaseCommand {
 
 ActivationGet.args = [
   {
-    name: 'activationID'
+    name: 'activationId'
   }
 ]
 
@@ -87,6 +89,11 @@ ActivationGet.flags = {
   action: flags.string({
     char: 'a',
     description: 'Fetch logs for a specific action'
+  }),
+  quiet: flags.boolean({
+    char: 'q',
+    description: 'Suppress last activation information header',
+    dependsOn: ['last']
   })
 }
 
