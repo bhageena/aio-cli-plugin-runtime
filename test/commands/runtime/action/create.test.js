@@ -598,8 +598,7 @@ describe('instance methods', () => {
     test('creates an action with action name, action path, --params flag, annotations and web flag as true', () => {
       const name = 'hello'
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
-      command.argv = [name, '/action/actionFile.js', '-p', 'a', 'b', '-p', 'c', 'd', '-a', 'desc', 'Description', '--web', 'true']
-      rtUtils.getKeyValueArrayFromMergedParameters.mockImplementation((flags, file) => (flags && [{ key: 'fake', value: 'abc' }]))
+      command.argv = [name, '/action/actionFile.js', '-p', 'a', 'b', '-p', 'c', 'd', '-a', 'desc', 'Description', '--web', 'true', '--web-secure', 'true']
       return command.run()
         .then(() => {
           expect(rtUtils.getKeyValueArrayFromMergedParameters).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], undefined)
@@ -612,15 +611,71 @@ describe('instance methods', () => {
                 code: jsFile,
                 kind: 'nodejs:default'
               },
-              parameters: [{
-                key: 'fake',
-                value: 'abc'
-              }],
-              annotations: [
-                { key: 'fake', value: 'abc' },
-                { key: 'web-export', value: true },
-                { key: 'final', value: true }
-              ]
+              parameters: createKeyValueArrayFromObject({ a: 'b', c: 'd' }),
+              annotations: createKeyValueArrayFromObject({ desc: 'Description', 'web-export': true, 'require-whisk-auth': true })
+            }
+          })
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('creates an action with action name with --web-secure true', () => {
+      const name = 'hello'
+      const cmd = ow.mockResolved(owAction, '')
+      command.argv = [name, '/action/actionFile.js', '--web', 'true', '--web-secure', 'true']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith({
+            name,
+            action: {
+              name,
+              exec: {
+                code: jsFile,
+                kind: 'nodejs:default'
+              },
+              annotations: createKeyValueArrayFromObject({ 'web-export': true, 'require-whisk-auth': true })
+            }
+          })
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('creates an action with action name with --web-secure false', () => {
+      const name = 'hello'
+      const cmd = ow.mockResolved(owAction, '')
+      command.argv = [name, '/action/actionFile.js', '--web', 'true', '--web-secure', 'false']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith({
+            name,
+            action: {
+              name,
+              exec: {
+                code: jsFile,
+                kind: 'nodejs:default'
+              },
+              annotations: createKeyValueArrayFromObject({ 'web-export': true, 'require-whisk-auth': false })
+            }
+          })
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('creates an action with action name with --web-secure abcxyz', () => {
+      const name = 'hello'
+      const cmd = ow.mockResolved(owAction, '')
+      command.argv = [name, '/action/actionFile.js', '--web', 'true', '--web-secure', 'abcxyz']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith({
+            name,
+            action: {
+              name,
+              exec: {
+                code: jsFile,
+                kind: 'nodejs:default'
+              },
+              annotations: createKeyValueArrayFromObject({ 'web-export': true, 'require-whisk-auth': 'abcxyz' })
             }
           })
           expect(stdout.output).toMatch('')
