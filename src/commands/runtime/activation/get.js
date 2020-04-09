@@ -35,6 +35,9 @@ class ActivationGet extends RuntimeBaseCommand {
         this.log('activation logs %s', id)
         const result = await ow.activations.logs(id)
         printLogs(result, true, this.log)
+      } else if (flags.result) {
+        const result = await ow.activations.result(id)
+        this.logJSON('', result.result)
       } else {
         const result = await ow.activations.get(id)
         this.logJSON('', result)
@@ -60,6 +63,10 @@ ActivationGet.flags = {
   logs: flags.boolean({
     char: 'g',
     description: 'emit only the logs, stripped of time stamps and stream identifier'
+  }),
+  result: flags.boolean({
+    char: 'r',
+    description: 'emit only the result'
   })
 }
 
