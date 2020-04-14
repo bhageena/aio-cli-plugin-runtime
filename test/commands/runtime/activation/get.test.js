@@ -98,11 +98,11 @@ describe('instance methods', () => {
 
     test('retrieve last activation --last', () => {
       const axList = rtLib.mockResolved('activations.list', [{ activationId: '12345' }])
-      const axGet = rtLib.mockResolved(rtAction, '')
+      const axGet = rtLib.mockResolved(rtAction, { start: 1569212581883 })
       command.argv = ['--last']
       return command.run()
         .then(() => {
-          expect(axList).toHaveBeenCalled()
+          expect(axList).toHaveBeenCalledWith({ limit: 1, skip: 0 })
           expect(axGet).toHaveBeenCalledWith('12345')
           expect(stdout.output).toMatch('')
         })

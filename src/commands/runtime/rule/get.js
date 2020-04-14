@@ -9,6 +9,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 
 class RuleGet extends RuntimeBaseCommand {
@@ -18,6 +19,8 @@ class RuleGet extends RuntimeBaseCommand {
       const ow = await this.wsk()
       const RuleGetObject = { ...args }
       const result = await ow.rules.get(RuleGetObject)
+      // rewrite updated to human readable form
+      result.date = moment(result.updated).format('YYYY-MM-DD HH:mm:ss')
       this.logJSON('', result)
     } catch (err) {
       this.handleError('failed to retrieve rule', err)
