@@ -37,7 +37,7 @@ class ActionList extends RuntimeBaseCommand {
       } else {
         const columns = {
           Datetime: {
-            get: row => moment(row.updated).format('MM/DD HH:MM:SS'),
+            get: row => moment(row.updated).format('MM/DD HH:mm:ss'),
             minWidth: 16,
           },
           published: {

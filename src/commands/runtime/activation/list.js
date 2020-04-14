@@ -54,7 +54,7 @@ class ActivationList extends RuntimeBaseCommand {
       } else {
         const columns = {
           Datetime: {
-            get: row => moment(row.start).format('MM/DD HH:MM:SS'),
+            get: row => moment(row.start).format('MM/DD HH:mm:ss'),
             minWidth: 16,
           },
           Status: {
