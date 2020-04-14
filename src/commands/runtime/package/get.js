@@ -10,6 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { parsePackageName } = require('../../../runtime-helpers')
 
@@ -20,6 +21,8 @@ class PackageGet extends RuntimeBaseCommand {
       const ow = await this.wsk()
       const options = parsePackageName(args.packageName)
       const result = await ow.packages.get(options)
+      // rewrite updated to human readable form
+      result.date = moment(result.updated).format('YYYY-MM-DD HH:mm:ss')
       this.logJSON('', result)
     } catch (err) {
       this.handleError('failed to retrieve the package', err)

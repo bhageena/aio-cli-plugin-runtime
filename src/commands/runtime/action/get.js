@@ -11,6 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const fs = require('fs')
+const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { fileExtensionForKind } = require('../../../runtime-helpers')
 const { flags } = require('@oclif/command')
@@ -23,6 +24,9 @@ class ActionGet extends RuntimeBaseCommand {
 
     try {
       const result = await ow.actions.get(name)
+      // rewrite updated to human readable form
+      result.date = moment(result.updated).format('YYYY-MM-DD HH:mm:ss')
+
       if (flags.url) {
         /*
           wsk go client uses :
