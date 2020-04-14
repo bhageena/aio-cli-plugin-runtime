@@ -265,7 +265,9 @@ describe('instance methods', () => {
       return command.run()
         .then(() => {
           expect(cmd).toHaveBeenCalledWith('hello')
-          expect(stdout.output).toMatchFixture('action/get.json')
+          const result = JSON.parse(stdout.output)
+          delete result.date
+          expect(`${JSON.stringify(result, null, 2)}\n`).toMatchFixture('action/get.json')
         })
         .finally(() => { TheCommand.fullGet = false })
     })

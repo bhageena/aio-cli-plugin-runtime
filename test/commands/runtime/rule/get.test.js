@@ -74,7 +74,7 @@ describe('instance methods', () => {
           expect(cmd).toHaveBeenCalledWith({
             name: 'nameFoo'
           })
-          expect(stdout.output).toMatchFixture('rule/get.json')
+          expect(stdout.output).toMatchFixture('rule/get-with-date.json')
         })
     })
 
