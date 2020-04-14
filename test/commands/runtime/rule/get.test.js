@@ -74,7 +74,8 @@ describe('instance methods', () => {
           expect(cmd).toHaveBeenCalledWith({
             name: 'nameFoo'
           })
-          expect(stdout.output).toMatchFixture('rule/get.json')
+          const { updated, date } = JSON.parse(fixtureFile('rule/get-with-date.json'))
+          expect(stdout.output).toMatch(fixtureFileWithTimeZoneAdjustment('rule/get-with-date.json', updated, undefined, date))
         })
     })
 
