@@ -9,6 +9,8 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
+
+const moment = require('moment')
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { printLogs } = require('@adobe/aio-lib-runtime').utils
@@ -40,6 +42,8 @@ class ActivationGet extends RuntimeBaseCommand {
         this.logJSON('', result.result)
       } else {
         const result = await ow.activations.get(id)
+        // rewrite updated to human readable form
+        result.date = moment(result.start).format('YYYY-MM-DD HH:mm:ss')
         this.logJSON('', result)
       }
     } catch (err) {
