@@ -10,6 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
 
@@ -53,25 +54,40 @@ class ActivationList extends RuntimeBaseCommand {
       } else {
         const columns = {
           Datetime: {
-            get: row => `${new Date(row.start).toLocaleString()}`
+            get: row => moment(row.start).format('MM/DD HH:mm:ss'),
+            minWidth: 16
           },
-          ActivationID: {
-            header: 'Activation ID',
-            get: row => `${row.activationId}`
+          Status: {
+            get: (row) => {
+              const statusStrings = ['success', 'error', 'error\uD83D\uDCA5', 'syserr']
+              return statusStrings[row.statusCode || 0]
+            },
+            minWidth: 9
           },
           Kind: {
             get: (row) => {
               if (row.duration !== undefined) {
                 const { annotations } = row
-                if (!annotations || !annotations.length) return
-                return annotations.find((elem) => {
-                  return (elem.key === 'kind')
-                }).value
+                let kind
+                if (annotations && annotations.length) {
+                  kind = annotations.find(_ => _.key === 'kind').value
+                }
+                return kind !== undefined ? kind.split(/[:-]/)[0] : '??'
               } else {
                 // this is a trigger
                 return 'trigger'
               }
-            }
+            },
+            minWidth: 9
+          },
+          version: {
+            header: 'Version',
+            minWidth: 9,
+            get: row => row.version
+          },
+          ActivationID: {
+            header: 'Activation ID',
+            get: row => `${row.activationId}`
           },
           Start: {
             get: (row) => {
@@ -90,23 +106,14 @@ class ActivationList extends RuntimeBaseCommand {
           Duration: {
             get: row => row.duration ? `${row.duration}ms` : '--'
           },
-          Status: {
-            get: (row) => {
-              const statusStrings = ['success', 'application error', 'developer error', 'internal error']
-              return statusStrings[row.statusCode || 0]
-            }
-          },
           Entity: {
             get: (row) => {
               const { annotations } = row
+              let path
               if (annotations && annotations.length) {
-                const path = annotations.find((elem) => {
-                  return (elem.key === 'path')
-                }).value
-                return `${path}:${row.version}`
-              } else {
-                return `${row.namespace}/${row.name}:${row.version}`
+                path = annotations.find(_ => _.key === 'path').value
               }
+              return path || `${row.namespace}/${row.name}`
             }
           }
         }

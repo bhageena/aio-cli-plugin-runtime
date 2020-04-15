@@ -133,8 +133,9 @@ describe('instance methods', () => {
           })
       })
     })
+
     test('return list of packages, --name-sort flag', () => {
-      const cmd = rtLib.mockResolvedFixture(rtAction, 'package/list-name-sort.json')
+      const cmd = rtLib.mockResolvedFixture(rtAction, 'package/list.json')
       command.argv = ['--name-sort']
       return command.run()
         .then(() => {
