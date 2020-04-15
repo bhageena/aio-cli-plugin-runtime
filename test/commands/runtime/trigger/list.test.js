@@ -62,6 +62,40 @@ describe('instance methods', () => {
     command = new TheCommand([])
     handleError = jest.spyOn(command, 'handleError')
     rtLib = await RuntimeLib.init({ apihost: 'fakehost', api_key: 'fakekey' })
+    rtLib.triggers.get = (name) => {
+      const response = {
+        annotations: [],
+        limits: {},
+        name,
+        namespace: 'namespace1',
+        parameters: [],
+        publish: false,
+        rules: {
+          'namespace1/rule1': {
+            action: {
+              name: 'action1',
+              path: 'namespace1'
+            },
+            status: name === 'trigger1' ? 'active' : 'inactive'
+          }
+        },
+        updated: 1606487704620,
+        version: '0.0.1'
+      }
+      if (name === 'trigger1') {
+        response.rules['namespace1/rule2'] = {
+          action: {
+            name: 'action2',
+            path: 'namespace1'
+          },
+          status: 'active'
+        }
+      }
+      if (name === 'trigger3') {
+        delete response.rules
+      }
+      return Promise.resolve(response)
+    }
     rtLib.mockResolved('actions.client.options', '')
     RuntimeLib.mockReset()
   })
@@ -96,7 +130,8 @@ describe('instance methods', () => {
     test('simple trigger list', () => {
       const cmd = rtLib.mockResolved(rtAction, [
         { name: 'trigger1', namespace: 'namespace1', publish: false },
-        { name: 'trigger2', namespace: 'namespace1', publish: true }
+        { name: 'trigger2', namespace: 'namespace1', publish: false },
+        { name: 'trigger3', namespace: 'namespace1', publish: false }
       ])
       return command.run()
         .then(() => {
@@ -110,7 +145,7 @@ describe('instance methods', () => {
     test('simple trigger list, --json flag', () => {
       const json = [
         { name: 'trigger1', namespace: 'namespace1', publish: false },
-        { name: 'trigger2', namespace: 'namespace1', publish: true }
+        { name: 'trigger2', namespace: 'namespace1', publish: false }
       ]
 
       const cmd = rtLib.mockResolved(rtAction, json)
@@ -120,7 +155,52 @@ describe('instance methods', () => {
           const cmdArg0 = cmd.mock.calls[0][0]
           expect(cmdArg0).toHaveProperty('limit', 30)
           expect(cmdArg0).not.toHaveProperty('skip')
-          expect(JSON.parse(stdout.output)).toMatchObject(json)
+          expect(JSON.parse(stdout.output)).toMatchObject([{
+            annotations: [],
+            limits: {},
+            name: 'trigger1',
+            namespace: 'namespace1',
+            parameters: [],
+            publish: false,
+            rules: {
+              'namespace1/rule1': {
+                action: {
+                  name: 'action1',
+                  path: 'namespace1'
+                },
+                status: 'active'
+              },
+              'namespace1/rule2': {
+                action: {
+                  name: 'action2',
+                  path: 'namespace1'
+                },
+                status: 'active'
+              }
+            },
+            updated: 1606487704620,
+            version: '0.0.1'
+          },
+          {
+            annotations: [],
+            limits: {},
+            name: 'trigger2',
+            namespace: 'namespace1',
+            parameters: [],
+            publish: false,
+            rules: {
+              'namespace1/rule1': {
+                action: {
+                  name: 'action1',
+                  path: 'namespace1'
+                },
+                status: 'inactive'
+              }
+            },
+            updated: 1606487704620,
+            version: '0.0.1'
+          }
+          ])
         })
     })
 

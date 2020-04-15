@@ -86,6 +86,15 @@ describe('instance methods', () => {
         })
     })
 
+    test('return list of web actions', () => {
+      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/list3.json')
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalled()
+          expect(stdout.output).toMatchFixture('action/list-output-3.txt')
+        })
+    })
+
     test('return list of actions in a package', () => {
       const cmd = rtLib.mockResolvedFixture(rtAction, 'action/list.json')
       command.argv = ['somepackage']
@@ -111,7 +120,7 @@ describe('instance methods', () => {
     })
 
     test('return list of actions - coverage (public/private)', () => {
-      const json = fixtureJson('action/list.json')
+      const json = fixtureJson('action/list2.json')
       json[0].publish = true
 
       const cmd = rtLib.mockResolved(rtAction, json)
@@ -138,7 +147,7 @@ describe('instance methods', () => {
       return command.run()
         .then(() => {
           expect(cmd).toHaveBeenCalledWith(expect.objectContaining({ skip: 3 }))
-          expect(stdout.output).toMatch('actions')
+          expect(stdout.output).toMatch('')
         })
     })
 

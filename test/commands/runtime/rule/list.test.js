@@ -136,6 +136,7 @@ describe('instance methods', () => {
           expect(stdout.output).toMatchFixture('rule/list-public.json')
         })
     })
+
     test('return list of rules, --name-sort flag', () => {
       const cmd = rtLib.mockResolvedFixture(rtAction, 'rule/list-name-sort.json')
       rtLib.mockResolvedFixtureMulitValue('rules.get', 'rule/get-name-sort.json')
