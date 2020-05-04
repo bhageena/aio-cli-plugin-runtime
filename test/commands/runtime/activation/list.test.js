@@ -132,14 +132,15 @@ describe('instance methods', () => {
         })
     })
 
-    test('return list of actions with activation id + data (cold)', () => {
+    test('return list of actions + data (cold)', () => {
       const data = [
         {
           activationId: '12345',
           annotations: [
             { key: 'path', value: '8888_9999/foo' },
             { key: 'kind', value: 'nodejs:10' },
-            { key: 'initTime', value: 20 }
+            { key: 'initTime', value: 20 },
+            { key: 'waitTime', value: 10 }
           ],
           duration: 23,
           name: 'foo',
@@ -148,16 +149,14 @@ describe('instance methods', () => {
           statusCode: 0,
           version: '0.0.1'
         }]
-      const cmd = rtLib.mockResolved(rtAction, data)
-      command.argv = ['12345']
+      rtLib.mockResolved(rtAction, data)
       return command.run()
         .then(() => {
-          expect(cmd).toHaveBeenCalledWith({ name: '12345' })
-          expect(stdout.output).toMatch('')
+          expect(stdout.output).toMatchFixture('activation/list-activation-cold-output.txt')
         })
     })
 
-    test('return list of actions with activation id + data (warm)', () => {
+    test('return list of actions + data (warm)', () => {
       const data = [
         {
           activationId: '12345',
@@ -173,12 +172,10 @@ describe('instance methods', () => {
           statusCode: 0,
           version: '0.0.1'
         }]
-      const cmd = rtLib.mockResolved(rtAction, data)
-      command.argv = ['12345']
+      rtLib.mockResolved(rtAction, data)
       return command.run()
         .then(() => {
-          expect(cmd).toHaveBeenCalledWith({ name: '12345' })
-          expect(stdout.output).toMatch('')
+          expect(stdout.output).toMatchFixture('activation/list-activation-warm-output.txt')
         })
     })
 
