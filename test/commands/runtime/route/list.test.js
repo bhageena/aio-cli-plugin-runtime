@@ -120,6 +120,16 @@ describe('instance methods', () => {
         })
     })
 
+    test('return empty list of apis', () => {
+      const cmd = rtLib.mockResolved(rtAction, { apis: [] })
+      command.argv = []
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalled()
+          expect(stdout.output).toMatch('')
+        })
+    })
+
     test('error, throws exception', () => {
       return new Promise((resolve, reject) => {
         rtLib.mockRejected(rtAction, new Error('an error'))

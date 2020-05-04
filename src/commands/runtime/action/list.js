@@ -41,7 +41,7 @@ class ActionList extends RuntimeBaseCommand {
         this.logJSON('', result)
       } else if (flags.count) {
         this.log(`You have ${result.actions} ${result.actions === 1 ? 'action' : 'actions'} in this namespace.`)
-      } else {
+      } else if (result.length > 0) {
         const columns = {
           Datetime: {
             get: row => moment(row.updated).format('MM/DD HH:mm:ss'),
