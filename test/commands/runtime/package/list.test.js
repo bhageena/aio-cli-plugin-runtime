@@ -71,7 +71,7 @@ describe('instance methods', () => {
 
     test('return list of packages - no data exception', () => {
       return new Promise((resolve, reject) => {
-        rtLib.mockResolved(rtAction, '')
+        rtLib.mockRejected(rtAction, '')
         command.argv = []
         return command.run()
           .then(() => reject(new Error('does not throw error')))
@@ -80,6 +80,16 @@ describe('instance methods', () => {
             resolve()
           })
       })
+    })
+
+    test('return empty list of packages', () => {
+      const cmd = rtLib.mockResolved(rtAction, [])
+      command.argv = []
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalled()
+          expect(stdout.output).toMatch('')
+        })
     })
 
     test('return list of packages --json', () => {
