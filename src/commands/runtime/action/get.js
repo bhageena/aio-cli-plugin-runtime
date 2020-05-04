@@ -75,7 +75,7 @@ class ActionGet extends RuntimeBaseCommand {
           }
         } else {
           // destructure getAction to remove the exec.code
-          this.logJSON(`${result.name}\n`, { ...result,
+          this.logJSON('', { ...result,
             exec: { ...result.exec,
               code: undefined
             }
