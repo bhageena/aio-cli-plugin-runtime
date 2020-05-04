@@ -34,7 +34,7 @@ class RuleList extends RuntimeBaseCommand {
       ).then((resultsWithStatus) => {
         if (flags.json) {
           this.logJSON('', resultsWithStatus)
-        } else {
+        } else if (resultsWithStatus.length > 0) {
           const columns = {
             Datetime: {
               get: row => moment(row.updated).format('MM/DD HH:mm:ss'),

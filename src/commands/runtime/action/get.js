@@ -66,10 +66,10 @@ class ActionGet extends RuntimeBaseCommand {
             fs.writeFileSync(saveFileName, result.exec.code)
           }
         } else if (ActionGet.fullGet) {
-          this.logJSON(`$result.name}\n`, result)
+          this.logJSON('', result)
         } else {
           // destructure getAction to remove the exec.code
-          this.logJSON(`${result.name}\n`, { ...result,
+          this.logJSON('', { ...result,
             exec: { ...result.exec,
               code: undefined
             }
