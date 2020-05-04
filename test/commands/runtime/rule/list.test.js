@@ -159,6 +159,16 @@ describe('instance methods', () => {
     //     })
     // })
 
+    test('return empty list of rules', () => {
+      const cmd = rtLib.mockResolved(rtAction, [])
+      command.argv = []
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalled()
+          expect(stdout.output).toMatch('')
+        })
+    })
+
     test('errors out on api error', () => {
       return new Promise((resolve, reject) => {
         rtLib.mockRejected('rules.list', new Error('an error'))

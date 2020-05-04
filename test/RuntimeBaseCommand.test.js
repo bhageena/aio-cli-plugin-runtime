@@ -15,6 +15,7 @@ const { Command } = require('@oclif/command')
 const { PropertyEnv } = require('../src/properties')
 const RuntimeLib = require('@adobe/aio-lib-runtime')
 const OpenWhiskError = require('openwhisk/lib/openwhisk_error')
+const { stdout } = require('stdout-stderr')
 
 beforeEach(() => {
   fakeFileSystem.reset()
@@ -170,6 +171,11 @@ describe('instance methods', () => {
         )
         delete process.env[PropertyEnv.AUTH]
       })
+    })
+
+    test('log json with message', async () => {
+      command.logJSON('hello', 'world')
+      expect(stdout.output).toEqual('hello "world"\n')
     })
 
     test('apiversion flag with env', async () => {

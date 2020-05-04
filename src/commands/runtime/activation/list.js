@@ -117,7 +117,7 @@ class ActivationList extends RuntimeBaseCommand {
             }
           }
         }
-        if (listActivation) {
+        if (listActivation.length > 0) {
           this.table(listActivation, columns, {
             'no-truncate': true
           })
