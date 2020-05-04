@@ -98,6 +98,34 @@ class ActivationList extends RuntimeBaseCommand {
               }
             }
           },
+          Wait: {
+            get: (row) => {
+              if (row.duration !== undefined) {
+                const { annotations } = row
+                if (!annotations || !annotations.length) return
+                const elem = annotations.find((elem) => {
+                  return (elem.key === 'waitTime')
+                })
+                return elem ? elem.value : '--'
+              } else {
+                return '--'
+              }
+            }
+          },
+          Init: {
+            get: (row) => {
+              if (row.duration !== undefined) {
+                const { annotations } = row
+                if (!annotations || !annotations.length) return
+                const elem = annotations.find((elem) => {
+                  return (elem.key === 'initTime')
+                })
+                return elem ? elem.value : 0
+              } else {
+                return '--'
+              }
+            }
+          },
           Duration: {
             get: row => row.duration ? `${row.duration}ms` : '--'
           },
