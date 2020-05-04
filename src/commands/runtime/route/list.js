@@ -61,7 +61,7 @@ class RouteList extends RuntimeBaseCommand {
 
       if (flags.json) {
         this.logJSON('', result.apis[0].value.apidoc)
-      } else {
+      } else if (result.apis.length) {
         let data = []
         result.apis.forEach(api => {
           // join the two arrays by reduce

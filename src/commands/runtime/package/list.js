@@ -35,7 +35,7 @@ class PackageList extends RuntimeBaseCommand {
       }
       if (flags.json) {
         this.logJSON('', result)
-      } else {
+      } else if (result.length) {
         const columns = {
           Datetime: {
             get: row => moment(row.updated).format('MM/DD HH:mm:ss'),
