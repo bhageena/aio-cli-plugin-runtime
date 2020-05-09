@@ -100,7 +100,7 @@ class RuntimeBaseCommand extends Command {
         if (err.error && err.error.error) {
           pretty = err.error.error.toLowerCase()
           if (err.statusCode) pretty = `${pretty} (${getStatusCode(err.statusCode)})`
-          else if (err.error.code) pretty = `${pretty} (${err.error.code})`
+          if (err.error.code) pretty = `${pretty} (request-id ${err.error.code})`
         } else if (err.statusCode) {
           pretty = getStatusCode(err.statusCode)
         }
