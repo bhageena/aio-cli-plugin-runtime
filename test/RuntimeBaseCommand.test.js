@@ -317,7 +317,7 @@ describe('instance methods', () => {
       err.error = 'The real error'
       err.code = 12
       command.handleError('msg', new OpenWhiskError('what', err))
-      expect(command.error).toHaveBeenCalledWith('msg: the real error (12)' + suffix)
+      expect(command.error).toHaveBeenCalledWith('msg: the real error (request-id 12)' + suffix)
     })
 
     test('openwhisk error, with status code', () => {
