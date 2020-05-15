@@ -22,7 +22,9 @@ class ActivationGet extends RuntimeBaseCommand {
     let id = args.activationId
     try {
       const ow = await this.wsk()
-      if (flags.last) {
+      if (flags.last && id) {
+        this.error('Cannot specify an `activationId` with --last flag.')
+      } else if (flags.last || !id) {
         const options = { limit: 1, skip: 0 }
         if (flags.filter) options.name = flags.filter
         const ax = await ow.activations.list(options)
@@ -31,9 +33,6 @@ class ActivationGet extends RuntimeBaseCommand {
         } else {
           this.handleError('no activations were returned')
         }
-      }
-      if (!id) {
-        this.error('Missing required arg: `activationId`')
       }
 
       if (flags.logs) {

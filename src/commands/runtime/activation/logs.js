@@ -23,22 +23,25 @@ class ActivationLogs extends RuntimeBaseCommand {
     let activations = [{ activationId: args.activationId }]
     const ow = await this.wsk()
 
-    if (flags.last) {
+    if (flags.last && args.activationId) {
+      this.error('Cannot specify an `activationId` with --last flag.')
+    } else if (flags.last || !args.activationId) {
       const name = flags.filter
       const limit = Math.max(1, Math.min(flags.count, ActivationListLimits.max))
       const options = { limit, skip: 0 }
       if (name) options.name = name
       activations = await ow.activations.list(options)
-    } else if (!args.activationId) {
-      // just a thought, but we could just return --last activation log when no id is present
-      this.error('Missing required arg: `activationId`')
     }
 
     const logger = this.log
     await Promise.all(activations.map((ax) => {
       return ow.activations.logs(ax.activationId).then((result) => {
         logger(chalk.dim('=== ') + chalk.bold('activation logs %s %s:%s'), ax.activationId, ax.name || '', ax.version || '')
-        printLogs(result, flags.strip, logger)
+        if (result.logs.length) {
+          printLogs(result, flags.strip, logger)
+        } else {
+          logger('This activation does not have any logs.')
+        }
       }, (err) => {
         this.handleError('failed to retrieve logs for activation', err)
       })
