@@ -63,7 +63,7 @@ class PackageList extends RuntimeBaseCommand {
           packages: {
             header: 'Packages',
             minWidth: 50,
-            get: row => `/${row.namespace}/${row.name}`
+            get: row => row.name
           }
         }
         this.table(result, columns)

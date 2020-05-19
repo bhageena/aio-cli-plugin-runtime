@@ -53,7 +53,7 @@ class RuleList extends RuntimeBaseCommand {
             rules: {
               header: 'Rules',
               minWidth: 50,
-              get: row => `/${row.namespace}/${row.name}`
+              get: row => row.name
             }
           }
           this.table(resultsWithStatus, columns)
