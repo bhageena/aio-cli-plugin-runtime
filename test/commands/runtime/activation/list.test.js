@@ -53,6 +53,7 @@ describe('instance methods', () => {
     handleError = jest.spyOn(command, 'handleError')
     rtLib = await RuntimeLib.init({ apihost: 'fakehost', api_key: 'fakekey' })
     rtLib.mockResolved('actions.client.options', '')
+    rtLib.namespaces.list = () => Promise.resolve(['8888_9999'])
     RuntimeLib.mockReset()
   })
 

@@ -38,7 +38,7 @@
         "timeout": 60000
       },
       "name": "a-hello",
-      "namespace": "53444_70361",
+      "namespace": "53444_41603",
       "publish": false,
       "updated": 1569212545646,
       "version": "0.0.1"
@@ -60,29 +60,7 @@
           "timeout": 60000
         },
         "name": "b-hello",
-        "namespace": "53444_70361",
-        "publish": false,
-        "updated": 1569212359316,
-        "version": "0.0.1"
-    },
-    {
-        "annotations": [
-          {
-            "key": "exec",
-            "value": "nodejs:10"
-          }
-        ],
-        "exec": {
-          "binary": false
-        },
-        "limits": {
-          "concurrency": 200,
-          "logs": 10,
-          "memory": 256,
-          "timeout": 60000
-        },
-        "name": "b-hello",
-        "namespace": "53444_70361",
+        "namespace": "53444_41603",
         "publish": false,
         "updated": 1569212359316,
         "version": "0.0.1"
