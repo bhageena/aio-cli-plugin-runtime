@@ -1,5 +1,5 @@
 Datetime        Status            Version  Trigger                                           
-11/27 09:35:04  inactive          0.0.1    /namespace1/a-hello                               
-11/27 09:35:04  inactive          0.0.1    /namespace1/b-hello                               
-11/27 09:35:04  inactive          0.0.1    /namespace1/b-hello                               
-11/27 09:35:04  inactive          0.0.1    /namespace1/c-hello                               
+11/27 09:35:04  inactive          0.0.1    a-hello                                           
+11/27 09:35:04  inactive          0.0.1    b-hello                                           
+11/27 09:35:04  inactive          0.0.1    b-hello                                           
+11/27 09:35:04  inactive          0.0.1    c-hello                                           
