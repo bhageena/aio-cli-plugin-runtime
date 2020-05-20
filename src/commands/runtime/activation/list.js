@@ -82,6 +82,17 @@ class ActivationList extends RuntimeBaseCommand {
             minWidth: 9,
             get: row => row.version
           },
+          Topmost: {
+            header: '',
+            maxWidth: 2,
+            get: row => {
+              const seq = row.annotations.find(_ => _.key === 'causedBy')
+              if (seq && seq.value == 'sequence') return '\u2024'
+              const top = row.annotations.find(_ => _.key === 'topmost')
+              if (top && top.value) return '\u25e1'
+              return ''
+            }
+          },
           ActivationID: {
             header: 'Activation ID',
             get: row => `${row.activationId}`
