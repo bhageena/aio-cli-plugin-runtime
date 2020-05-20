@@ -179,6 +179,52 @@ describe('instance methods', () => {
         })
     })
 
+    test('return list of actions + topmost', () => {
+      const data = [
+        {
+          activationId: '12345',
+          annotations: [
+            { key: 'path', value: '8888_9999/foo' },
+            { key: 'kind', value: 'nodejs:10' },
+            { key: 'topmost', value: true }
+          ],
+          duration: 23,
+          name: 'foo',
+          namespace: '8888_9999',
+          start: 1558507178861,
+          statusCode: 0,
+          version: '0.0.1'
+        }]
+      rtLib.mockResolved(rtAction, data)
+      return command.run()
+        .then(() => {
+          expect(stdout.output).toMatchFixture('activation/list-activation-topmost-output.txt')
+        })
+    })
+
+    test('return list of actions + sequence', () => {
+      const data = [
+        {
+          activationId: '12345',
+          annotations: [
+            { key: 'path', value: '8888_9999/foo' },
+            { key: 'kind', value: 'nodejs:10' },
+            { key: 'causedBy', value: 'sequence' }
+          ],
+          duration: 23,
+          name: 'foo',
+          namespace: '8888_9999',
+          start: 1558507178861,
+          statusCode: 0,
+          version: '0.0.1'
+        }]
+      rtLib.mockResolved(rtAction, data)
+      return command.run()
+        .then(() => {
+          expect(stdout.output).toMatchFixture('activation/list-activation-sequence-output.txt')
+        })
+    })
+
     test('return list of trigger activations', () => {
       const date = 1606487719405
       const data = [
