@@ -96,6 +96,17 @@ describe('instance methods', () => {
       expect(command.run).toBeInstanceOf(Function)
     })
 
+    test('creates an action without an action name and only action path', () => {
+      const name = 'actionFile'
+      const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
+      command.argv = [`/action/${name}.js`]
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith({ name, action: { name, exec: { code: jsFile, kind: 'nodejs:default' } } })
+          expect(stdout.output).toMatch('')
+        })
+    })
+
     test('creates an action with action name and action path', () => {
       const name = 'hello'
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
