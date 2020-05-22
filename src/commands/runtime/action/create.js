@@ -11,6 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const fs = require('fs')
+const path = require('path')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { createKeyValueArrayFromFlag, createKeyValueArrayFromFile, createComponentsfromSequence, getKeyValueArrayFromMergedParameters } = require('@adobe/aio-lib-runtime').utils
 const { kindForFileExtension } = require('../../../kinds')
@@ -21,7 +22,7 @@ class ActionCreate extends RuntimeBaseCommand {
 
   async run () {
     const { args, flags } = this.parse(ActionCreate)
-    const name = args.actionName
+    let name = args.actionName
     let exec
     let paramsAction
     let envParams
@@ -40,7 +41,14 @@ class ActionCreate extends RuntimeBaseCommand {
       } else if (flags.native && flags.kind) {
         throw (new Error('Cannot specify a kind and a native runtime at the same time'))
       } else if (!args.actionPath && !flags.sequence && !flags.docker && !this.isUpdate()) {
-        throw (new Error('Must provide a code artifact, container image, or a sequence'))
+        if (fs.existsSync(name)) {
+          args.actionPath = name
+          const parts = path.basename(name).split('.')
+          parts.pop()
+          name = parts.join('.')
+        } else {
+          throw (new Error('Must provide a code artifact, container image, or a sequence'))
+        }
       }
 
       // can only specify main handler when also providing a file
