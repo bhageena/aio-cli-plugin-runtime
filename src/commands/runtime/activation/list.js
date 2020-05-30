@@ -13,6 +13,7 @@ governing permissions and limitations under the License.
 const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
+const statusStrings = ['success', 'error', 'error\uD83D\uDCA5', 'syserr']
 
 class ActivationList extends RuntimeBaseCommand {
   async run () {
@@ -61,8 +62,14 @@ class ActivationList extends RuntimeBaseCommand {
           },
           Status: {
             get: (row) => {
-                const statusStrings = ['success', 'error', 'error\uD83D\uDCA5', 'syserr']
-              return statusStrings[row.statusCode || 0]
+              const code = statusStrings[row.statusCode || 0]
+              if (row.statusCode == 2) {
+                const timeout = row.annotations.find(_ => _.key === 'timeout')
+                if (timeout && timeout.value) {
+                  return `timeout`
+                }
+              }
+              return code
             },
             minWidth: 9,
           },
