@@ -14,6 +14,7 @@ const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { parsePackageName } = require('@adobe/aio-lib-runtime').utils
 const { flags } = require('@oclif/command')
+const decorators = require('../../../decorators').decorators()
 
 class ActionList extends RuntimeBaseCommand {
   async run () {
@@ -52,9 +53,9 @@ class ActionList extends RuntimeBaseCommand {
               const auth = row.annotations.find(_ => _.key === 'require-whisk-auth')
               if (web && web.value !== false) {
                 if (auth && auth.value === true) {
-                  return `web \uD83D\uDD10`
+                  return `web ${decorators.lock_with_key}`
                 } if (auth) {
-                  return `web \uD83D\uDD10`
+                  return `web ${decorators.lock_with_key}`
                 } else {
                   return 'web'
                 }
