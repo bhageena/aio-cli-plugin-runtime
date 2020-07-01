@@ -13,7 +13,8 @@ governing permissions and limitations under the License.
 const moment = require('moment')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { flags } = require('@oclif/command')
-const statusStrings = ['success', 'error', 'error\uD83D\uDCA5', 'syserr']
+const { decorators } = require('../../../decorators')
+const statusStrings = ['success', 'error', `error${decorators.collision}`, 'syserr']
 
 class ActivationList extends RuntimeBaseCommand {
   async run () {
@@ -58,7 +59,7 @@ class ActivationList extends RuntimeBaseCommand {
         const columns = {
           Datetime: {
             get: row => moment(row.start).format('MM/DD HH:mm:ss'),
-            minWidth: 16,
+            minWidth: 16
           },
           Status: {
             get: (row) => {
@@ -71,7 +72,7 @@ class ActivationList extends RuntimeBaseCommand {
               }
               return code
             },
-            minWidth: 9,
+            minWidth: 9
           },
           Kind: {
             get: (row) => {
@@ -94,9 +95,9 @@ class ActivationList extends RuntimeBaseCommand {
             maxWidth: 2,
             get: row => {
               const seq = row.annotations.find(_ => _.key === 'causedBy')
-              if (seq && seq.value == 'sequence') return '\u2024'
+              if (seq && seq.value == 'sequence') return decorators.dot
               const top = row.annotations.find(_ => _.key === 'topmost')
-              if (top && top.value) return '\u25e1'
+              if (top && top.value) return decorators.half_circle_lower
               return ''
             }
           },
