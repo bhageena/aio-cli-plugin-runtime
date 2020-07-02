@@ -144,17 +144,17 @@ class ActionCreate extends RuntimeBaseCommand {
           case 'no':
             annotationParams.push({ key: 'web-export', value: false })
         }
-      }
 
-      if (flags['web-secure']) {
-        const ws = flags['web-secure']
-        const lc = ws.toLowerCase()
-        if (lc === 'true') {
-          annotationParams.push({ key: 'require-whisk-auth', value: true })
-        } else if (lc === 'false') {
-          annotationParams.push({ key: 'require-whisk-auth', value: false })
-        } else {
-          annotationParams.push({ key: 'require-whisk-auth', value: ws })
+        if (flags['web-secure']) {
+          const ws = flags['web-secure']
+          const lc = ws.toLowerCase()
+          if (lc === 'true') {
+            annotationParams.push({ key: 'require-whisk-auth', value: true })
+          } else if (lc === 'false') {
+            annotationParams.push({ key: 'require-whisk-auth', value: false })
+          } else {
+            annotationParams.push({ key: 'require-whisk-auth', value: ws })
+          }
         }
       }
 
@@ -218,7 +218,8 @@ ActionCreate.flags = {
     options: ['true', 'yes', 'false', 'no', 'raw']
   }),
   'web-secure': flags.string({
-    description: 'secure the web action (valid values are true, false, or any string)' // help description for flag
+    description: 'secure the web action (valid values are true, false, or any string)', // help description for flag
+    dependsOn: ['web']
   }),
   'param-file': flags.string({
     char: 'P',
@@ -242,6 +243,7 @@ ActionCreate.flags = {
   }),
   kind: flags.string({
     description: 'the KIND of the action runtime (example: swift:default, nodejs:default)' // help description for flag
+    // exclusive: ['sequence', 'docker']
   }),
   annotation: flags.string({
     char: 'a',
@@ -254,15 +256,18 @@ ActionCreate.flags = {
   }),
   sequence: flags.string({
     description: 'treat ACTION as comma separated sequence of actions to invoke' // help description for flag
+    // exclusive: ['docker', 'kind']
   }),
   docker: flags.string({
     description: 'use provided Docker image (a path on DockerHub) to run the action' // help description for flag
+    // exclusive: ['kind', 'sequence']
   }),
   main: flags.string({
     description: 'the name of the action entry point (function or fully-qualified method name when applicable)'
   }),
   binary: flags.boolean({
     description: 'treat code artifact as binary'
+    // dependsOn: ['kind']
   }),
   json: flags.boolean({
     description: 'output raw json'
