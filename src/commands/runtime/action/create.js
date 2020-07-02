@@ -163,6 +163,7 @@ class ActionCreate extends RuntimeBaseCommand {
       }
 
       if (flags['web-secure']) {
+        annotationParams = annotationParams || []
         const ws = flags['web-secure']
         const lc = ws.toLowerCase()
         if (lc === 'true') {
