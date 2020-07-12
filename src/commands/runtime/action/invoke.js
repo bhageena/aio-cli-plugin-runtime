@@ -32,7 +32,7 @@ class ActionInvoke extends RuntimeBaseCommand {
         params: paramsAction,
         blocking,
         result,
-        headers: { 'X-OW-EXTRA-LOGGING': 'on' }
+        headers: ActionInvoke.extraLoggingHeader ? { 'X-OW-EXTRA-LOGGING': 'on' } : undefined
       })
       this.logJSON('', actionResult)
     } catch (err) {
@@ -89,8 +89,9 @@ ActionInvoke.flags = {
     hidden: true
   })
 }
-ActionInvoke.description = 'Invokes an Action'
 
+ActionInvoke.description = 'Invokes an Action'
+ActionInvoke.extraLoggingHeader = true
 ActionInvoke.aliases = ['rt:action:invoke']
 
 module.exports = ActionInvoke
