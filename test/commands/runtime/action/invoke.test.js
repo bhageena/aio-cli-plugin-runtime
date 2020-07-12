@@ -105,6 +105,19 @@ describe('instance methods', () => {
         })
     })
 
+    test('does not set X-OW-EXTRA-LOGGING header when invoking an action with flag disabled', () => {
+      TheCommand.extraLoggingHeader = false
+      const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
+      command.argv = ['hello']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith(expect.not.objectContaining(({ 'X-OW-EXTRA-LOGGING': 'on' })))
+        })
+        .finally(() => {
+          TheCommand.extraLoggingHeader = true
+        })
+    })
+
     test('invokes an action with action name and params', () => {
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
       command.argv = ['hello', '--param', 'a', 'b', 'c', 'd']
