@@ -77,7 +77,8 @@ class ActivationList extends RuntimeBaseCommand {
           Kind: {
             get: (row) => {
               if (row.duration !== undefined) {
-                return `${row.annotations.find(_ => _.key === 'kind').value.split(/[:-]/)[0]}`
+                const kind = row.annotations.find(_ => _.key === 'kind').value
+                return `${kind.includes('lambda') ? kind.replace('-lambda', '') + ' (λ)' : kind}`
               } else {
                 // this is a trigger
                 return 'trigger'
