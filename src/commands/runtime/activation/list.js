@@ -23,28 +23,30 @@ class ActivationList extends RuntimeBaseCommand {
     try {
       const options = {}
       if (id) {
-        options['name'] = id
+        options.name = id
       }
       if (flags.limit) {
-        options['limit'] = flags.limit
+        options.limit = flags.limit
       }
       if (flags.skip) {
-        options['skip'] = flags.skip
+        options.skip = flags.skip
       }
       if (flags.since) {
-        options['since'] = flags.since
+        options.since = flags.since
       }
       if (flags.upto) {
-        options['upto'] = flags.upto
+        options.upto = flags.upto
       }
       if (flags.full) {
-        options['docs'] = flags.full
+        options.docs = flags.full
         // implies --json
         flags.json = true
       }
+      if (flags.count) {
+        options.count = true
+      }
 
       const ow = await this.wsk()
-      const ns = (await ow.namespaces.list())[0]
 
       let listActivation
       if (Object.entries(options).length === 0) {
@@ -53,9 +55,23 @@ class ActivationList extends RuntimeBaseCommand {
         listActivation = await ow.activations.list(options)
       }
 
+      // if only showing the count, show the result and return
+      if (flags.count) {
+        const result = listActivation
+        if (flags.json) {
+          this.logJSON('', result)
+        } else {
+          this.log(`You have ${result.activations} ${result.activations === 1 ? 'activation' : 'activations'} in this namespace.`)
+        }
+        return
+      }
+
       if (flags.json) {
         this.logJSON('', listActivation)
       } else {
+        // determine the namespace to use in the activation table
+        const ns = (await ow.namespaces.list())[0]
+
         const columns = {
           Datetime: {
             get: row => moment(row.start).format('MM/DD HH:mm:ss'),
@@ -64,7 +80,7 @@ class ActivationList extends RuntimeBaseCommand {
           Status: {
             get: (row) => {
               const code = statusStrings[row.statusCode || 0]
-              if (row.statusCode == 2) {
+              if (row.statusCode === 2) {
                 const timeout = row.annotations.find(_ => _.key === 'timeout')
                 if (timeout && timeout.value) {
                   return `timeout`
@@ -96,7 +112,7 @@ class ActivationList extends RuntimeBaseCommand {
             maxWidth: 2,
             get: row => {
               const seq = row.annotations.find(_ => _.key === 'causedBy')
-              if (seq && seq.value == 'sequence') return decorators.dot
+              if (seq && seq.value === 'sequence') return decorators.dot
               const top = row.annotations.find(_ => _.key === 'topmost')
               if (top && top.value) return decorators.half_circle_lower
               return ''
@@ -202,6 +218,10 @@ ActivationList.flags = {
   }),
   upto: flags.integer({
     description: 'return activations with timestamps earlier than UPTO; measured in milliseconds since Th, 01, Jan 1970'
+  }),
+  count: flags.boolean({
+    char: 'c',
+    description: 'show only the total number of activations'
   }),
   json: flags.boolean({
     description: 'output raw json'
