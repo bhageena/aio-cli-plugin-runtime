@@ -36,7 +36,7 @@ $ npm install -g @adobe/aio-cli-plugin-runtime
 $ ./bin/run COMMAND
 running command...
 $ ./bin/run (-v|--version|version)
-@adobe/aio-cli-plugin-runtime/1.7.3 darwin-x64 node-v10.16.1
+@adobe/aio-cli-plugin-runtime/1.7.3 darwin-x64 node-v14.5.0
 $ ./bin/run --help [COMMAND]
 USAGE
   $ ./bin/run COMMAND
@@ -55,7 +55,7 @@ USAGE
 * [`./bin/run runtime:action:update ACTIONNAME [ACTIONPATH]`](#binrun-runtimeactionupdate-actionname-actionpath)
 * [`./bin/run runtime:activation`](#binrun-runtimeactivation)
 * [`./bin/run runtime:activation:get [ACTIVATIONID]`](#binrun-runtimeactivationget-activationid)
-* [`./bin/run runtime:activation:list [ACTIVATIONID]`](#binrun-runtimeactivationlist-activationid)
+* [`./bin/run runtime:activation:list [ACTIVATION_NAME]`](#binrun-runtimeactivationlist-activation_name)
 * [`./bin/run runtime:activation:logs [ACTIVATIONID]`](#binrun-runtimeactivationlogs-activationid)
 * [`./bin/run runtime:activation:result [ACTIVATIONID]`](#binrun-runtimeactivationresult-activationid)
 * [`./bin/run runtime:deploy`](#binrun-runtimedeploy)
@@ -207,6 +207,8 @@ OPTIONS
 
   --web=true|yes|false|no|raw            treat ACTION as a web action or as a raw HTTP web action
 
+  --web-secure=web-secure                secure the web action (valid values are true, false, or any string)
+
 ALIASES
   $ ./bin/run rt:action:create
 ```
@@ -251,6 +253,7 @@ USAGE
   $ ./bin/run runtime:action:get ACTIONNAME
 
 OPTIONS
+  -c, --code               show action code (only works if code is not a zip file
   -i, --insecure           bypass certificate check
   -r, --url                get action url
   -u, --auth=auth          whisk auth
@@ -281,10 +284,10 @@ USAGE
 
 OPTIONS
   -P, --param-file=param-file  FILE containing parameter values in JSON format
-  -b, --blocking               blocking invoke
+  -f, --full                   wait for full activation record
   -i, --insecure               bypass certificate check
+  -n, --no-wait                fire and forget (asynchronous invoke, does not wait for the result)
   -p, --param=param            parameter values in KEY VALUE format
-  -r, --result                 blocking invoke; show only activation result (unless there is a failure)
   -u, --auth=auth              whisk auth
   -v, --verbose                Verbose output
   --apihost=apihost            whisk API host
@@ -310,6 +313,7 @@ USAGE
   $ ./bin/run runtime:action:list [PACKAGENAME]
 
 OPTIONS
+  -c, --count              show only the total number of actions
   -i, --insecure           bypass certificate check
   -l, --limit=limit        only return LIMIT number of actions from the collection (default 30)
   -n, --name               sort results by name
@@ -374,8 +378,7 @@ OPTIONS
 
   --debug=debug                          Debug level output
 
-  --docker=docker                        [Restricted Access] use provided Docker image (a path on DockerHub) to run the
-                                         action
+  --docker=docker                        use provided Docker image (a path on DockerHub) to run the action
 
   --help                                 Show help
 
@@ -393,6 +396,8 @@ OPTIONS
   --version                              Show version
 
   --web=true|yes|false|no|raw            treat ACTION as a web action or as a raw HTTP web action
+
+  --web-secure=web-secure                secure the web action (valid values are true, false, or any string)
 
 ALIASES
   $ ./bin/run rt:action:update
@@ -435,9 +440,11 @@ USAGE
   $ ./bin/run runtime:activation:get [ACTIVATIONID]
 
 OPTIONS
+  -f, --filter=filter      the name of the activations to filter on (this flag may only be used with --last)
   -g, --logs               emit only the logs, stripped of time stamps and stream identifier
   -i, --insecure           bypass certificate check
   -l, --last               retrieves the most recent activation
+  -r, --result             emit only the result
   -u, --auth=auth          whisk auth
   -v, --verbose            Verbose output
   --apihost=apihost        whisk API host
@@ -454,15 +461,16 @@ ALIASES
 
 _See code: [src/commands/runtime/activation/get.js](https://github.com/adobe/aio-cli-plugin-runtime/blob/1.7.3/src/commands/runtime/activation/get.js)_
 
-## `./bin/run runtime:activation:list [ACTIVATIONID]`
+## `./bin/run runtime:activation:list [ACTIVATION_NAME]`
 
 Lists all the Activations
 
 ```
 USAGE
-  $ ./bin/run runtime:activation:list [ACTIVATIONID]
+  $ ./bin/run runtime:activation:list [ACTIVATION_NAME]
 
 OPTIONS
+  -c, --count              show only the total number of activations
   -f, --full               include full activation description
   -i, --insecure           bypass certificate check
 
@@ -518,7 +526,8 @@ USAGE
   $ ./bin/run runtime:activation:logs [ACTIVATIONID]
 
 OPTIONS
-  -c, --count=count        [default: 1] used with --last, return the last `count` activation logs. Max 5
+  -c, --count=count        [default: 1] used with --last, return the last `count` activation logs (up to 200)
+  -f, --filter=filter      the name of the activations to filter on (this flag may only be used with --last)
   -i, --insecure           bypass certificate check
   -l, --last               retrieves the most recent activation logs
   -r, --strip              strip timestamp information and output first line only
@@ -553,6 +562,8 @@ USAGE
   $ ./bin/run runtime:activation:result [ACTIVATIONID]
 
 OPTIONS
+  -c, --count=count        [default: 1] used with --last, return the last `count` activation logs (up to 200)
+  -f, --filter=filter      the name of the activations to filter on (this flag may only be used with --last)
   -i, --insecure           bypass certificate check
   -l, --last               retrieves the most recent activation result
   -u, --auth=auth          whisk auth
@@ -984,6 +995,7 @@ USAGE
   $ ./bin/run runtime:package:list [NAMESPACE]
 
 OPTIONS
+  -c, --count              show only the total number of packages
   -i, --insecure           bypass certificate check
   -l, --limit=limit        only return LIMIT number of packages from the collection (default 30)
   -n, --name               sort results by name
@@ -1528,6 +1540,7 @@ USAGE
   $ ./bin/run runtime:rule:list
 
 OPTIONS
+  -c, --count        show only the total number of rules
   -i, --insecure     bypass certificate check
   -l, --limit=limit  [default: 30] Limit number of rules returned. Default 30
   -n, --name         sort results by name
@@ -1654,6 +1667,7 @@ OPTIONS
   -A, --annotation-file=annotation-file  FILE containing annotation values in JSON format
   -P, --param-file=param-file            FILE containing parameter values in JSON format
   -a, --annotation=annotation            annotation values in KEY VALUE format
+  -f, --feed=feed                        trigger feed action name
   -i, --insecure                         bypass certificate check
   -p, --param=param                      parameter values in KEY VALUE format
   -u, --auth                             whisk auth
@@ -1770,6 +1784,7 @@ USAGE
   $ ./bin/run runtime:trigger:list
 
 OPTIONS
+  -c, --count        show only the total number of triggers
   -i, --insecure     bypass certificate check
   -l, --limit=limit  [default: 30] only return LIMIT number of triggers from the collection (default 30)
   -n, --name         sort results by name

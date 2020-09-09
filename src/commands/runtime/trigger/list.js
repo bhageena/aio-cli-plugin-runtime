@@ -27,12 +27,27 @@ class TriggerList extends RuntimeBaseCommand {
         options.skip = flags.skip
       }
 
+      if (flags.count) {
+        options.count = true
+      }
+
       const result = await ow.triggers.list(options)
+
+      // if only showing the count, show the result and return
+      if (flags.count) {
+        if (flags.json) {
+          this.logJSON('', result)
+        } else {
+          this.log(`You have ${result.triggers} ${result.triggers === 1 ? 'trigger' : 'triggers'} in this namespace.`)
+        }
+        return
+      }
+
       if (flags['name-sort'] || flags.name) {
         result.sort((a, b) => a.name.localeCompare(b.name))
       }
 
-      const p = Promise.all(
+      Promise.all(
         result.map(item => {
           const res = ow.triggers.get(item.name)
           return res
@@ -44,7 +59,7 @@ class TriggerList extends RuntimeBaseCommand {
           const columns = {
             Datetime: {
               get: row => moment(row.updated).format('MM/DD HH:mm:ss'),
-              minWidth: 16,
+              minWidth: 16
             },
             status: {
               header: 'Status',
@@ -52,12 +67,12 @@ class TriggerList extends RuntimeBaseCommand {
                 let active = 0
                 if (row.rules) {
                   const entries = Object.entries(row.rules)
-                  active = entries.filter(([k,v]) => v.status === 'active').length
+                  active = entries.filter(([k, v]) => v.status === 'active').length
                 }
                 return `${active} active`
               },
-              minWidth: 18,
-            },              
+              minWidth: 18
+            },
             version: {
               header: 'Version',
               minWidth: 9,
@@ -88,6 +103,10 @@ TriggerList.flags = {
   skip: flags.integer({
     char: 's',
     description: 'exclude the first SKIP number of triggers from the result'
+  }),
+  count: flags.boolean({
+    char: 'c',
+    description: 'show only the total number of triggers'
   }),
   json: flags.boolean({
     description: 'output raw json'
