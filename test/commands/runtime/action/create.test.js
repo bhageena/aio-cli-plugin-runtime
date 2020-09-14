@@ -165,6 +165,41 @@ describe('instance methods', () => {
         })
     })
 
+    test('creates an action with action name and action path and --native flag', () => {
+      const name = 'hello'
+      const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
+      command.argv = [name, '/action/actionFile.js', '--native']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith({
+            name,
+            action: {
+              name,
+              exec: {
+                code: jsFile,
+                kind: 'blackbox',
+                image: 'openwhisk/dockerskeleton'
+              }
+            }
+          })
+          expect(stdout.output).toMatch('')
+        })
+    })
+
+    test('creates an action with action name and missing action path and --native flag', () => {
+      return new Promise((resolve, reject) => {
+        rtLib.mockRejected(rtAction, '')
+        const name = 'hello'
+        command.argv = [name, '--native']
+        return command.run()
+          .then(() => reject(new Error('does not throw error')))
+          .catch(() => {
+            expect(handleError).toHaveBeenLastCalledWith('failed to create the action', new Error('Must provide a code artifact, container image, or a sequence'))
+            resolve()
+          })
+      })
+    })
+
     test('creates an action with action name and action path --json', () => {
       const name = 'hello'
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
@@ -731,7 +766,7 @@ describe('instance methods', () => {
         return command.run()
           .then(() => reject(new Error('does not throw error')))
           .catch(() => {
-            expect(handleError).toHaveBeenLastCalledWith('failed to create the action', new Error('Cannot determine kind of action. Please use --kind to specifiy.'))
+            expect(handleError).toHaveBeenLastCalledWith('failed to create the action', new Error('Cannot determine kind of action. Please use --kind to specify.'))
             resolve()
           })
       })
@@ -776,6 +811,19 @@ describe('instance methods', () => {
       })
     })
 
+    test('creates an action with --native and --sequence', () => {
+      return new Promise((resolve, reject) => {
+        rtLib.mockRejected(rtAction, '')
+        command.argv = ['hello', '--native', '--sequence', 'a,b,c']
+        return command.run()
+          .then(() => reject(new Error('did not throw error')))
+          .catch(() => {
+            expect(handleError).toHaveBeenLastCalledWith('failed to create the action', new Error('Cannot specify sequence and a native runtime at the same time'))
+            resolve()
+          })
+      })
+    })
+
     test('creates an action with --docker and --kind', () => {
       return new Promise((resolve, reject) => {
         rtLib.mockRejected(rtAction, '')
@@ -784,6 +832,19 @@ describe('instance methods', () => {
           .then(() => reject(new Error('does not throw error')))
           .catch(() => {
             expect(handleError).toHaveBeenLastCalledWith('failed to create the action', new Error('Cannot specify a kind and a container image at the same time'))
+            resolve()
+          })
+      })
+    })
+
+    test('creates an action with --native and --kind', () => {
+      return new Promise((resolve, reject) => {
+        rtLib.mockRejected(rtAction, '')
+        command.argv = ['hello', '/action/actionFile.js', '--kind', 'nodejs:8', '--native']
+        return command.run()
+          .then(() => reject(new Error('does not throw error')))
+          .catch(() => {
+            expect(handleError).toHaveBeenLastCalledWith('failed to create the action', new Error('Cannot specify a kind and a native runtime at the same time'))
             resolve()
           })
       })
