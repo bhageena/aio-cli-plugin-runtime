@@ -32,8 +32,12 @@ class ActionCreate extends RuntimeBaseCommand {
         throw (new Error('Cannot specify sequence and a code artifact at the same time'))
       } else if (flags.docker && flags.sequence) {
         throw (new Error('Cannot specify sequence and a container image at the same time'))
+      } else if (flags.native && flags.sequence) {
+        throw (new Error('Cannot specify sequence and a native runtime at the same time'))
       } else if (flags.docker && flags.kind) {
         throw (new Error('Cannot specify a kind and a container image at the same time'))
+      } else if (flags.native && flags.kind) {
+        throw (new Error('Cannot specify a kind and a native runtime at the same time'))
       } else if (!args.actionPath && !flags.sequence && !flags.docker && !this.isUpdate()) {
         if (fs.existsSync(name)) {
           args.actionPath = name
@@ -62,8 +66,8 @@ class ActionCreate extends RuntimeBaseCommand {
           exec = {}
 
           if (args.actionPath.endsWith('.zip') || flags.binary) {
-            if (!flags.kind && !flags.docker) {
-              throw (new Error('Invalid argument(s). creating an action from a zip/binary artifact requires specifying the action kind explicitly'))
+            if (!flags.kind && !flags.docker && !flags.native) {
+              throw (new Error('Invalid argument(s). Creating an action from a zip/binary artifact requires specifying the action kind explicitly'))
             }
             exec.code = fs.readFileSync(args.actionPath).toString('base64')
           } else {
@@ -76,12 +80,12 @@ class ActionCreate extends RuntimeBaseCommand {
 
           if (flags.kind) {
             exec.kind = flags.kind
-          } else if (!flags.docker) {
+          } else if (!flags.docker && !flags.native) {
             const kind = kindForFileExtension(args.actionPath)
             if (kind !== undefined) {
               exec.kind = kind
             } else {
-              throw new Error('Cannot determine kind of action. Please use --kind to specifiy.')
+              throw new Error('Cannot determine kind of action. Please use --kind to specify.')
             }
           }
         } else {
@@ -100,6 +104,9 @@ class ActionCreate extends RuntimeBaseCommand {
         exec = exec || {}
         exec.kind = 'blackbox'
         exec.image = flags.docker
+      } else if (flags.native) {
+        exec.kind = 'blackbox'
+        exec.image = 'openwhisk/dockerskeleton'
       }
 
       if (flags.param) {
@@ -274,6 +281,9 @@ ActionCreate.flags = {
   }),
   docker: flags.string({
     description: 'use provided Docker image (a path on DockerHub) to run the action' // help description for flag
+  }),
+  native: flags.boolean({
+    description: 'use default skeleton runtime where code artifact provides actual executable for the action' // help description for flag
   }),
   main: flags.string({
     description: 'the name of the action entry point (function or fully-qualified method name when applicable)'
