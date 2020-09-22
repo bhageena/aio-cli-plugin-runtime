@@ -36,6 +36,11 @@ class RuntimeBaseCommand extends Command {
       ignore_certs: flags.insecure || config.get('runtime.insecure')
     }
 
+    // Suppress sending of namespace header when namespace is nullified
+    if (options.namespace === '_') {
+      delete options.namespace
+    }
+
     // remove any null or undefined keys
     Object
       .keys(options)
