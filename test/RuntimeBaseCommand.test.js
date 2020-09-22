@@ -342,4 +342,15 @@ describe('instance methods', () => {
       expect(command.error).toHaveBeenCalledWith('msg' + suffix)
     })
   })
+
+  test('optionally nullify namespace', async () => {
+    expect((await command.getOptions()).namespace).toEqual('some_namespace')
+
+    const config = require('@adobe/aio-lib-core-config')
+    config.get.mockReturnValue('_')
+    const newCommand = new TheCommand([])
+    newCommand.setNamespaceHeaderOmission(true)
+    const options = await newCommand.getOptions()
+    expect(options.namespace).toEqual(undefined)
+  })
 })
