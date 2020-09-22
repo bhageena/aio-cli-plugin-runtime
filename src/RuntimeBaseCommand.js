@@ -22,6 +22,10 @@ const config = require('@adobe/aio-lib-core-config')
 let cli
 
 class RuntimeBaseCommand extends Command {
+  setNamespaceHeaderOmission (newValue) {
+    RuntimeBaseCommand.omitWildcardNamespaceHeader = newValue
+  }
+
   async getOptions () {
     const { flags } = this.parse(this.constructor)
     const properties = propertiesFile()
@@ -34,6 +38,11 @@ class RuntimeBaseCommand extends Command {
       namespace: config.get('runtime.namespace') || properties.get('NAMESPACE'),
       api_key: flags.auth || config.get('runtime.auth') || properties.get('AUTH'),
       ignore_certs: flags.insecure || config.get('runtime.insecure')
+    }
+
+    // Optionally suppress sending of namespace header when namespace is nullified
+    if (RuntimeBaseCommand.omitWildcardNamespaceHeader && options.namespace === '_') {
+      delete options.namespace
     }
 
     // remove any null or undefined keys
@@ -174,5 +183,7 @@ RuntimeBaseCommand.flags = {
     default: 'aio-cli-plugin-runtime@' + require('../package.json').version
   })
 }
+
+RuntimeBaseCommand.omitWildcardNamespaceHeader = false
 
 module.exports = RuntimeBaseCommand
