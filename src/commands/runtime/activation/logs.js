@@ -22,6 +22,20 @@ class ActivationLogs extends RuntimeBaseCommand {
     // note: could be null, but we wait to check
     let activations = [{ activationId: args.activationId }]
     const ow = await this.wsk()
+    let start
+    let count
+
+    // should this be rejected if doing --last --count > 1?
+      if (flags.slice) {
+      // accepts slice values of the forms N[:], -N[:], N:M, -N:M.
+      const matches = flags.slice.match(/^(-?[\d])+:?$|^(-?[\d]+):([\d]+)$/)
+      if (matches) {
+          start = matches[1] || matches[2]
+          count = matches[3]
+      } else {
+        this.error('Invalid slice argument. Examples are 2, 1:3, -1, -1:1.')
+      }
+    }
 
     if (flags.last && args.activationId) {
       this.error('Cannot specify an `activationId` with --last flag.')
@@ -36,8 +50,16 @@ class ActivationLogs extends RuntimeBaseCommand {
     const logger = this.log
     await Promise.all(activations.map((ax) => {
       return ow.activations.logs(ax.activationId).then((result) => {
-        logger(chalk.dim('=== ') + chalk.bold('activation logs %s %s:%s'), ax.activationId, ax.name || '', ax.version || '')
+        if (!flags.quiet) {
+          logger(chalk.dim('=== ') + chalk.bold('activation logs %s %s:%s'), ax.activationId, ax.name || '', ax.version || '')
+        }
         if (result.logs.length) {
+          if (start) {
+            result.logs = result.logs.slice(start)
+            if (count) {
+              result.logs = result.logs.slice(0, count)
+            }
+          }
           printLogs(result, flags.strip, logger)
         } else {
           logger('This activation does not have any logs.')
@@ -73,6 +95,14 @@ ActivationLogs.flags = {
   filter: flags.string({
     char: 'f',
     description: 'the name of the activations to filter on (this flag may only be used with --last)'
+  }),
+  slice: flags.string({
+    char: 's',
+    description: 'accepts "start[:count]" to slice log lines from "start" to end or up to "count" lines (use negative start to reverse index)'
+  }),
+  quiet: flags.boolean({
+    char: 'q',
+    description: 'silence header which is printed before the log lines'
   })
 }
 
