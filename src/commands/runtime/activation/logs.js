@@ -48,6 +48,16 @@ class ActivationLogs extends RuntimeBaseCommand {
     }
 
     const logger = this.log
+    const tryJsonLogFormat = msg => {
+      try {
+        const asJson = JSON.parse(msg)
+        this.logJSON('', asJson)
+      } catch (e) {
+        // ignore the error and print as string
+        logger(msg)
+      }
+    }
+
     await Promise.all(activations.map((ax) => {
       return ow.activations.logs(ax.activationId).then((result) => {
         if (!flags.quiet) {
@@ -60,7 +70,12 @@ class ActivationLogs extends RuntimeBaseCommand {
               result.logs = result.logs.slice(0, count)
             }
           }
-          printLogs(result, flags.strip, logger)
+
+          if (!flags.strip && flags.json) {
+            this.logJSON('', result.logs)
+          } else {
+            printLogs(result, flags.strip, flags.json ? tryJsonLogFormat : logger)
+          }
         } else {
           logger('This activation does not have any logs.')
         }
@@ -99,6 +114,9 @@ ActivationLogs.flags = {
   slice: flags.string({
     char: 's',
     description: 'accepts "start[:count]" to slice log lines from "start" to end or up to "count" lines (use negative start to reverse index)'
+  }),
+  json: flags.boolean({
+    description: 'attempt to interpret each log line as JSON and pretty print it'
   }),
   quiet: flags.boolean({
     char: 'q',
