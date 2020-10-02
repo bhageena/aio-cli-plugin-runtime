@@ -25,7 +25,7 @@ class ActivationGet extends RuntimeBaseCommand {
       if (flags.last && id) {
         this.error('Cannot specify an `activationId` with --last flag.')
       } else if (flags.last || !id) {
-        const options = { limit: 1, skip: 0 }
+        const options = { limit: 1, skip: flags.skip }
         if (flags.filter) options.name = flags.filter
         const ax = await ow.activations.list(options)
         if (ax && ax.length > 0) {
@@ -37,7 +37,9 @@ class ActivationGet extends RuntimeBaseCommand {
 
       if (flags.logs) {
         const result = await ow.activations.logs(id)
-        this.log(chalk.dim('=== ') + chalk.bold('activation logs %s %s'), id, flags.filter || '')
+        if (!flags.quiet) {
+          this.log(chalk.dim('=== ') + chalk.bold('activation logs %s %s'), id, flags.filter || '')
+        }
         printLogs(result, true, this.log)
       } else if (flags.result) {
         const result = await ow.activations.result(id)
@@ -66,6 +68,11 @@ ActivationGet.flags = {
     char: 'l',
     description: 'retrieves the most recent activation'
   }),
+  skip: flags.integer({
+    char: 's',
+    description: 'exclude the first SKIP number of activations from the result',
+    default: 0
+  }),
   logs: flags.boolean({
     char: 'g',
     description: 'emit only the logs, stripped of time stamps and stream identifier'
@@ -77,6 +84,10 @@ ActivationGet.flags = {
   filter: flags.string({
     char: 'f',
     description: 'the name of the activations to filter on (this flag may only be used with --last)'
+  }),
+  quiet: flags.boolean({
+    char: 'q',
+    description: 'silence header which is printed before the log lines'
   })
 }
 
