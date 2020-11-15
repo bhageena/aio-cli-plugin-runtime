@@ -23,6 +23,11 @@ class ActionGet extends RuntimeBaseCommand {
     const ow = await this.wsk()
 
     try {
+      if ((flags['save-as'] !== undefined && flags['save-as'].length === 0) ||
+          (flags['save-env'] !== undefined && flags['save-env'].length === 0)) {
+        throw (new Error(ActionGet.invalidFilename))
+      }
+
       const result = await ow.actions.get(name)
       // rewrite updated to human readable form
       result.date = moment(result.updated).format('YYYY-MM-DD HH:mm:ss')
@@ -53,16 +58,23 @@ class ActionGet extends RuntimeBaseCommand {
           this.log(`${opts.api}${nsPrefix}/${namespace}/${actionPrefix}/${packageName}${result.name}`)
         }
       } else {
-        const bSaveFile = flags['save-as'] && flags['save-as'].length > 0
+        const saveFile = flags['save-as']
+        const saveEnv = flags['save-env']
 
-        if (flags.save || bSaveFile) {
+        if (flags.save || saveFile || saveEnv) {
+          // allow env and code to be saved together
+          if (saveEnv) {
+            const saveEnvFileName = saveEnv
+            const envVars = result.parameters.filter(_ => _.init).map(_ => `${_.key}=${_.value}`)
+            fs.writeFileSync(saveEnvFileName, envVars.join('\n'))
+          }
           if (result.exec.binary) {
-            const saveFileName = bSaveFile ? flags['save-as'] : `${result.name}.zip`
+            const saveFileName = saveFile || `${result.name}.zip`
             const data = Buffer.from(result.exec.code, 'base64')
             fs.writeFileSync(saveFileName, data, 'buffer')
           } else {
             const extension = fileExtensionForKind(result.exec.kind)
-            const saveFileName = bSaveFile ? flags['save-as'] : `${result.name}${extension}`
+            const saveFileName = saveFile || `${result.name}${extension}`
             fs.writeFileSync(saveFileName, result.exec.code)
           }
         } else if (ActionGet.fullGet) {
@@ -83,7 +95,7 @@ class ActionGet extends RuntimeBaseCommand {
         }
       }
     } catch (err) {
-      if (err.message === ActionGet.codeNotText) {
+      if (err.message === ActionGet.codeNotText || err.message === ActionGet.invalidFilename) {
         this.handleError(err.message)
       } else {
         this.handleError('failed to retrieve the action', err)
@@ -109,6 +121,10 @@ ActionGet.flags = {
     char: 'c',
     description: 'show action code (only works if code is not a zip file)'
   }),
+  'save-env': flags.string({
+    char: 'E',
+    description: 'save environment variables to FILE as key-value pairs'
+  }),
   save: flags.boolean({
     description: 'save action code to file corresponding with action name'
   }),
@@ -122,6 +138,7 @@ ActionGet.flags = {
 ActionGet.fullGet = false
 
 ActionGet.codeNotText = 'Cannot display code because it is not plaintext.'
+ActionGet.invalidFilename = 'Must specify a valid file name.'
 
 ActionGet.description = 'Retrieves an Action'
 

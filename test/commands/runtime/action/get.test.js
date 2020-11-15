@@ -196,6 +196,43 @@ describe('instance methods', () => {
           })
       })
     })
+
+    test('show action code --code', () => {
+      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/get.json')
+      command.argv = ['hello', '--code']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith('hello')
+          expect(stdout.output).toMatch('this is the code')
+        })
+    })
+
+    test('report error for show binary action code --code', () => {
+      return new Promise((resolve, reject) => {
+        rtLib.mockResolvedFixture(rtAction, 'action/get.binary.json')
+        command.argv = ['hello', '--code']
+        return command.run()
+          .then(() => reject(new Error('does not throw error')))
+          .catch(() => {
+            expect(handleError).toHaveBeenLastCalledWith(TheCommand.codeNotText)
+            resolve()
+          })
+      })
+    })
+
+    test('retrieve an action and do not omit code', () => {
+      TheCommand.fullGet = true
+      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/get.json')
+      command.argv = ['hello']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith('hello')
+          const result = JSON.parse(stdout.output)
+          delete result.date
+          expect(`${JSON.stringify(result, null, 2)}\n`).toMatchFixture('action/get.json')
+        })
+        .finally(() => { TheCommand.fullGet = false })
+    })
   })
 
   describe('save and save-as flags', () => {
@@ -258,41 +295,27 @@ describe('instance methods', () => {
         })
     })
 
-    test('retrieve an action and do not omit code', () => {
-      TheCommand.fullGet = true
-      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/get.json')
-      command.argv = ['hello']
-      return command.run()
-        .then(() => {
-          expect(cmd).toHaveBeenCalledWith('hello')
-          const result = JSON.parse(stdout.output)
-          delete result.date
-          expect(`${JSON.stringify(result, null, 2)}\n`).toMatchFixture('action/get.json')
-        })
-        .finally(() => { TheCommand.fullGet = false })
-    })
-
-    test('show action code --code', () => {
-      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/get.json')
-      command.argv = ['hello', '--code']
-      return command.run()
-        .then(() => {
-          expect(cmd).toHaveBeenCalledWith('hello')
-          expect(stdout.output).toMatch('this is the code')
-        })
-    })
-
-    test('report error for show binary action code --code', () => {
+    test('report error when missing file name', () => {
       return new Promise((resolve, reject) => {
-        rtLib.mockResolvedFixture(rtAction, 'action/get.binary.json')
-        command.argv = ['hello', '--code']
+        command.argv = ['hello', '--save-as', '']
         return command.run()
           .then(() => reject(new Error('does not throw error')))
           .catch(() => {
-            expect(handleError).toHaveBeenLastCalledWith(TheCommand.codeNotText)
+            expect(handleError).toHaveBeenLastCalledWith(TheCommand.invalidFilename)
             resolve()
           })
       })
+    })
+
+    test('retrieve an action --save-env', () => {
+      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/get-env.json')
+      fs.writeFileSync = jest.fn()
+      command.argv = ['hello', '--save-env', 'filename.env']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith('hello')
+          expect(fs.writeFileSync).toHaveBeenCalledWith('filename.env', 'ENV_1=true')
+        })
     })
   })
 })
