@@ -1,0 +1,33 @@
+{
+  "parameters": [
+    {
+      "key": "param1",
+      "value": true
+    },
+    {
+      "key": "ENV_1",
+      "init": true,
+      "value": true
+    },
+    {
+      "key": "param2",
+      "value": true
+    }
+  ],
+  "exec": {
+    "binary": false,
+    "kind": "nodejs:10-fat",
+    "code":"this is the code"
+  },
+  "limits": {
+    "concurrency": 1,
+    "logs": 10,
+    "memory": 256,
+    "timeout": 60000
+  },
+  "name": "hello",
+  "namespace": "53444_41603",
+  "publish": false,
+  "updated": 1549408742750,
+  "version": "0.0.2"
+}
