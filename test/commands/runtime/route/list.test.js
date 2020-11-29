@@ -87,6 +87,11 @@ describe('instance methods', () => {
       expect(command.run).toBeInstanceOf(Function)
     })
 
+    test('route override', async () => {
+      const wsk = await command.wsk()
+      expect(wsk.routes.routeMgmtApiPath('path')).toBe('web/whisk-system/apimgmt/path')
+    })
+
     test('no required args (all are optional) - should not throw exception', () => {
       rtLib.mockResolvedFixture(rtAction, 'route/list.json')
       return expect(() => {
