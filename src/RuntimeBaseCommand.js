@@ -68,7 +68,18 @@ class RuntimeBaseCommand extends Command {
     if (!options) {
       options = await this.getOptions()
     }
-    return runtimeLib.init(options)
+
+    const rt = await runtimeLib.init(options)
+    rt.routes = new Proxy(rt.routes, {
+      get (target, property) {
+        if (property === 'routeMgmtApiPath') {
+          return (path) => `web/whisk-system/apimgmt/${path}`
+        } else {
+          return Reflect.get(...arguments)
+        }
+      }
+    })
+    return rt
   }
 
   getImsOrgId () {
