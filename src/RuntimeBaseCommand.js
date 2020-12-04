@@ -40,8 +40,8 @@ class RuntimeBaseCommand extends Command {
       ignore_certs: flags.insecure || config.get('runtime.insecure')
     }
 
-    // Suppress sending of namespace header when namespace is nullified
-    if (options.namespace === '_') {
+    // Optionally suppress sending of namespace header when namespace is nullified
+    if (RuntimeBaseCommand.omitWildcardNamespaceHeader && options.namespace === '_') {
       delete options.namespace
     }
 
@@ -183,5 +183,7 @@ RuntimeBaseCommand.flags = {
     default: 'aio-cli-plugin-runtime@' + require('../package.json').version
   })
 }
+
+RuntimeBaseCommand.omitWildcardNamespaceHeader = false
 
 module.exports = RuntimeBaseCommand
