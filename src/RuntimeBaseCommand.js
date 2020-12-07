@@ -22,13 +22,9 @@ const config = require('@adobe/aio-lib-core-config')
 let cli
 
 class RuntimeBaseCommand extends Command {
-  // Allows some toggling of behavior concerning the namespace header
-  // This allows avoidance of some CORS issues when code executes in a browser
-  omitWildcardNamespaceHeader = false
   setNamespaceHeaderOmission(newValue) {
-    this.omitWildcardNamespaceHeader = newValue
-  }
-
+    RuntimeBaseCommand.omitWildcardNamespaceHeader = newValue
+  }  
   async getOptions () {
     const { flags } = this.parse(this.constructor)
     let properties = { get: () => null }
@@ -48,7 +44,7 @@ class RuntimeBaseCommand extends Command {
     }
 
     // Optionally suppress sending of namespace header when namespace is nullified
-    if (this.omitWildcardNamespaceHeader && options.namespace === '_') {
+    if (RuntimeBaseCommand.omitWildcardNamespaceHeader && options.namespace === '_') {
       delete options.namespace
     }
 
@@ -190,5 +186,7 @@ RuntimeBaseCommand.flags = {
     default: 'aio-cli-plugin-runtime@' + require('../package.json').version
   })
 }
+
+RuntimeBaseCommand.omitWildcardNamespaceHeader = false
 
 module.exports = RuntimeBaseCommand
