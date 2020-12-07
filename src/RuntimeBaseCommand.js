@@ -22,6 +22,9 @@ const config = require('@adobe/aio-lib-core-config')
 let cli
 
 class RuntimeBaseCommand extends Command {
+  setNamespaceHeaderOmission(newValue) {
+    RuntimeBaseCommand.omitWildcardNamespaceHeader = newValue
+  }  
   async getOptions () {
     const { flags } = this.parse(this.constructor)
     let properties = { get: () => null }
