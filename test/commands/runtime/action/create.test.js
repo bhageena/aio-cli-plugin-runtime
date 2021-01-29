@@ -430,66 +430,12 @@ describe('instance methods', () => {
       const name = 'hello'
       const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
       command.argv = [name, '/action/actionFile.js', '--env', 'a', 'b', '--env', 'c', 'd']
-      rtUtils.createKeyValueArrayFromFlag.mockReturnValue([{ key: 'fakeEnv', value: 'abc' }])
+      rtUtils.getKeyValueArrayFromMergedParameters.mockImplementation((flags, file) => {
+        if (flags) return [{ key: 'fakeEnv', value: 'ccc' }]
+      })
       return command.run()
         .then(() => {
-          expect(rtUtils.createKeyValueArrayFromFlag).toHaveBeenCalledWith(['a', 'b', 'c', 'd'])
-          expect(cmd).toHaveBeenCalledWith({
-            name,
-            action: {
-              name,
-              exec: {
-                code: jsFile,
-                kind: 'nodejs:default'
-              },
-              parameters: [{
-                key: 'fakeEnv',
-                value: 'abc',
-                init: true
-              }]
-            }
-          })
-          expect(stdout.output).toMatch('')
-        })
-    })
-
-    test('creates an action with action name, action path and --e flag', () => {
-      const name = 'hello'
-      const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
-      command.argv = [name, '/action/actionFile.js', '--env', 'a', 'b', '-e', 'c', 'd']
-      rtUtils.createKeyValueArrayFromFlag.mockReturnValue([{ key: 'fakeEnv', value: 'abc' }])
-      return command.run()
-        .then(() => {
-          expect(rtUtils.createKeyValueArrayFromFlag).toHaveBeenCalledWith(['a', 'b', 'c', 'd'])
-          expect(cmd).toHaveBeenCalledWith({
-            name,
-            action: {
-              name,
-              exec: {
-                code: jsFile,
-                kind: 'nodejs:default'
-              },
-              parameters: [{
-                key: 'fakeEnv',
-                value: 'abc',
-                init: true
-              }]
-            }
-          })
-          expect(stdout.output).toMatch('')
-        })
-    })
-
-    test('creates an action with action name, action path and --env and --param flag', () => {
-      const name = 'hello'
-      const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
-      command.argv = [name, '/action/actionFile.js', '--env', 'a', 'b', '--param', 'c', 'd']
-      rtUtils.getKeyValueArrayFromMergedParameters.mockImplementation((flags, file) => flags && [{ key: 'fakeParam', value: 'aaa' }, { key: 'fakeParam2', value: 'bbb' }])
-      rtUtils.createKeyValueArrayFromFlag.mockReturnValue([{ key: 'fakeEnv', value: 'abc' }])
-      return command.run()
-        .then(() => {
-          expect(rtUtils.getKeyValueArrayFromMergedParameters).toHaveBeenCalledWith(['c', 'd'], undefined)
-          expect(rtUtils.createKeyValueArrayFromFlag).toHaveBeenCalledWith(['a', 'b'])
+          expect(rtUtils.getKeyValueArrayFromMergedParameters).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], undefined)
           expect(cmd).toHaveBeenCalledWith({
             name,
             action: {
@@ -499,9 +445,7 @@ describe('instance methods', () => {
                 kind: 'nodejs:default'
               },
               parameters: [
-                { key: 'fakeParam', value: 'aaa' },
-                { key: 'fakeParam2', value: 'bbb' },
-                { key: 'fakeEnv', value: 'abc', init: true }
+                { key: 'fakeEnv', value: 'ccc', init: true }
               ]
             }
           })
@@ -509,13 +453,30 @@ describe('instance methods', () => {
         })
     })
 
+    test('creates an action with action name, action path and --e flag', () => {
+      const name = 'hello'
+      command.argv = [name, '/action/actionFile.js', '--env', 'a', 'b', '-e', 'c', 'd']
+      return command.run()
+        .then(() => {
+          expect(rtUtils.getKeyValueArrayFromMergedParameters).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], undefined)
+        })
+    })
+
+    test('creates an action with action name, action path and --env and --param flag', () => {
+      const name = 'hello'
+      command.argv = [name, '/action/actionFile.js', '--env', 'a', 'b', '--param', 'c', 'd']
+      return command.run()
+        .then(() => {
+          expect(rtUtils.getKeyValueArrayFromMergedParameters).toHaveBeenCalledWith(['c', 'd'], undefined)
+          expect(rtUtils.getKeyValueArrayFromMergedParameters).toHaveBeenCalledWith(['a', 'b'], undefined)
+        })
+    })
+
     test('creates an action with action name, action path and overlapping --env and --param keys', () => {
       return new Promise((resolve, reject) => {
-        rtLib.mockRejected(rtAction, '')
         const name = 'hello'
         command.argv = [name, '/action/actionFile.js', '--env', 'a', 'b', '--param', 'a', 'd']
-        rtUtils.getKeyValueArrayFromMergedParameters.mockImplementation((flags, file) => flags && [{ key: 'same', value: 'kv' }])
-        rtUtils.createKeyValueArrayFromFlag.mockReturnValue([{ key: 'same', value: 'abc' }])
+        rtUtils.getKeyValueArrayFromMergedParameters.mockReturnValue([{ key: 'same', value: 'abc' }])
         return command.run()
           .then(() => reject(new Error('does not throw error')))
           .catch(() => {
@@ -527,28 +488,10 @@ describe('instance methods', () => {
 
     test('creates an action with action name, action path and --env-file flag', () => {
       const name = 'hello'
-      const cmd = rtLib.mockResolved(rtAction, { res: 'fake' })
       command.argv = [name, '/action/actionFile.js', '--env-file', '/action/parameters.json']
-      rtUtils.createKeyValueArrayFromFile.mockReturnValue([{ key: 'fakeEnv', value: 'abc' }])
       return command.run()
         .then(() => {
-          expect(rtUtils.createKeyValueArrayFromFile).toHaveBeenCalledWith('/action/parameters.json')
-          expect(cmd).toHaveBeenCalledWith({
-            name,
-            action: {
-              name,
-              exec: {
-                code: jsFile,
-                kind: 'nodejs:default'
-              },
-              parameters: [{
-                key: 'fakeEnv',
-                value: 'abc',
-                init: true
-              }]
-            }
-          })
-          expect(stdout.output).toMatch('')
+          expect(rtUtils.getKeyValueArrayFromMergedParameters).toHaveBeenCalledWith(undefined, '/action/parameters.json')
         })
     })
 
