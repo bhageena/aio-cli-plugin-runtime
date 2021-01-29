@@ -13,7 +13,7 @@ governing permissions and limitations under the License.
 const fs = require('fs')
 const path = require('path')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
-const { createKeyValueArrayFromFlag, createKeyValueArrayFromFile, createComponentsfromSequence, getKeyValueArrayFromMergedParameters } = require('@adobe/aio-lib-runtime').utils
+const { createComponentsfromSequence, getKeyValueArrayFromMergedParameters } = require('@adobe/aio-lib-runtime').utils
 const { kindForFileExtension } = require('../../../kinds')
 const { flags } = require('@oclif/command')
 
@@ -113,15 +113,11 @@ class ActionCreate extends RuntimeBaseCommand {
 
       paramsAction = getKeyValueArrayFromMergedParameters(flags.param, flags['param-file'])
 
-      if (flags.env) {
-        // each --env flag expects two values ( a key and a value ). Multiple --env flags can be passed
-        // For example : aio runtime:action:update --env name "foo" --env city "bar"
-        envParams = createKeyValueArrayFromFlag(flags.env)
-      } else if (flags['env-file']) {
-        envParams = createKeyValueArrayFromFile(flags['env-file'])
+      if (flags.env || flags['env-file']) {
+        envParams = getKeyValueArrayFromMergedParameters(flags.env, flags['env-file'])
       }
 
-      // merge parametes and environemtn variables
+      // merge parametes and environment variables
       if (envParams) {
         envParams = envParams.map(e => ({ ...e, init: true }))
         if (paramsAction) {
