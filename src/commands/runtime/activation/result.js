@@ -13,7 +13,7 @@ governing permissions and limitations under the License.
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const ActivationListLimits = require('./list').limits
-const chalk = require('chalk')
+const { makeBanner } = require('./banner')
 
 class ActivationResult extends RuntimeBaseCommand {
   async run () {
@@ -32,26 +32,16 @@ class ActivationResult extends RuntimeBaseCommand {
       activations = await ow.activations.list(options)
     }
 
-    const logger = this.log
-    await Promise.all(activations.map((ax) => {
-      return ow.activations.result(ax.activationId).then((result) => {
-        if (flags.last && limit > 1) {
-          logger(chalk.dim('=== ') + chalk.bold('%s %s:%s (%s) %s'), ax.activationId, ax.name || '', ax.version || '', ActivationResult.statusToString(ax.statusCode), new Date(ax.end).toLocaleString())
+    await Promise.all(activations.map((activation) => {
+      return ow.activations.result(activation.activationId).then((result) => {
+        if (flags.last && !flags.quiet) {
+          this.log(makeBanner(activation))
         }
         this.logJSON('', result.result)
       }, (err) => {
         this.handleError('failed to retrieve results for activation', err)
       })
     }))
-  }
-}
-
-ActivationResult.statusToString = (status) => {
-  switch (status) {
-    case 0: return 'success'
-    case 1: return 'application error'
-    case 2: return 'developer error'
-    default: return 'system error'
   }
 }
 
@@ -84,6 +74,11 @@ ActivationResult.flags = {
   action: flags.string({
     description: 'Fetch results for a specific action',
     char: 'a'
+  }),
+  quiet: flags.boolean({
+    char: 'q',
+    description: 'Suppress last activation information header',
+    dependsOn: ['last']
   })
 }
 
