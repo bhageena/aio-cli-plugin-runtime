@@ -15,7 +15,7 @@ const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const rtLib = require('@adobe/aio-lib-runtime')
 const printLogs = rtLib.utils.printLogs
 const ActivationListLimits = require('./list').limits
-const { makeBanner } = require('./banner')
+const { makeBanner } = require('../../../banner')
 
 class ActivationLogs extends RuntimeBaseCommand {
   async run () {

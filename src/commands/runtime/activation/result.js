@@ -1,3 +1,4 @@
+
 /*
 Copyright 2019 Adobe Inc. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,7 @@ governing permissions and limitations under the License.
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const ActivationListLimits = require('./list').limits
-const { makeBanner } = require('./banner')
+const { makeBanner } = require('../../../banner')
 
 class ActivationResult extends RuntimeBaseCommand {
   async run () {

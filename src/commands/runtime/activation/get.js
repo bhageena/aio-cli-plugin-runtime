@@ -14,7 +14,7 @@ const moment = require('moment')
 const { flags } = require('@oclif/command')
 const RuntimeBaseCommand = require('../../../RuntimeBaseCommand')
 const { printLogs } = require('@adobe/aio-lib-runtime').utils
-const { makeBanner } = require('./banner')
+const { makeBanner } = require('../../../banner')
 
 class ActivationGet extends RuntimeBaseCommand {
   async run () {
