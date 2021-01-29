@@ -60,13 +60,20 @@ class ActionGet extends RuntimeBaseCommand {
       } else {
         const saveFile = flags['save-as']
         const saveEnv = flags['save-env']
+        const saveEnvJson = flags['save-env-json']
 
-        if (flags.save || saveFile || saveEnv) {
+        if (flags.save || saveFile || saveEnv || saveEnvJson) {
           // allow env and code to be saved together
           if (saveEnv) {
             const saveEnvFileName = saveEnv
             const envVars = result.parameters.filter(_ => _.init).map(_ => `${_.key}=${_.value}`)
             fs.writeFileSync(saveEnvFileName, envVars.join('\n'))
+          }
+          if (saveEnvJson) {
+            const saveEnvFileName = saveEnvJson
+            const envVars = {}
+            result.parameters.filter(_ => _.init).map(_ => { envVars[_.key] = _.value })
+            fs.writeFileSync(saveEnvFileName, JSON.stringify(envVars, null, 2))
           }
           if (result.exec.binary) {
             const saveFileName = saveFile || `${result.name}.zip`
@@ -124,6 +131,10 @@ ActionGet.flags = {
   'save-env': flags.string({
     char: 'E',
     description: 'save environment variables to FILE as key-value pairs'
+  }),
+  'save-env-json': flags.string({
+    char: 'J',
+    description: 'save environment variables to FILE as JSON'
   }),
   save: flags.boolean({
     description: 'save action code to file corresponding with action name'
