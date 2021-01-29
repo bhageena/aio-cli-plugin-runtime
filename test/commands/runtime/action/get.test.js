@@ -317,5 +317,16 @@ describe('instance methods', () => {
           expect(fs.writeFileSync).toHaveBeenCalledWith('filename.env', 'ENV_1=true')
         })
     })
+
+    test('retrieve an action --save-env-json', () => {
+      const cmd = rtLib.mockResolvedFixture(rtAction, 'action/get-env.json')
+      fs.writeFileSync = jest.fn()
+      command.argv = ['hello', '--save-env-json', 'filename.json']
+      return command.run()
+        .then(() => {
+          expect(cmd).toHaveBeenCalledWith('hello')
+          expect(fs.writeFileSync).toHaveBeenCalledWith('filename.json', JSON.stringify({ ENV_1: true }, null, 2))
+        })
+    })
   })
 })
