@@ -202,6 +202,9 @@ OPTIONS
   --main=main                            the name of the action entry point (function or fully-qualified method name
                                          when applicable)
 
+  --native                               use default skeleton runtime where code artifact provides actual executable for
+                                         the action
+
   --sequence=sequence                    treat ACTION as comma separated sequence of actions to invoke
 
   --version                              Show version
@@ -258,20 +261,22 @@ USAGE
   $ aio runtime:action:get ACTIONNAME
 
 OPTIONS
-  -c, --code               show action code (only works if code is not a zip file)
-  -i, --insecure           bypass certificate check
-  -r, --url                get action url
-  -u, --auth=auth          whisk auth
-  -v, --verbose            Verbose output
-  --apihost=apihost        whisk API host
-  --apiversion=apiversion  whisk API version
-  --cert=cert              client cert
-  --debug=debug            Debug level output
-  --help                   Show help
-  --key=key                client key
-  --save                   save action code to file corresponding with action name
-  --save-as=save-as        file to save action code to
-  --version                Show version
+  -E, --save-env=save-env            save environment variables to FILE as key-value pairs
+  -J, --save-env-json=save-env-json  save environment variables to FILE as JSON
+  -c, --code                         show action code (only works if code is not a zip file)
+  -i, --insecure                     bypass certificate check
+  -r, --url                          get action url
+  -u, --auth=auth                    whisk auth
+  -v, --verbose                      Verbose output
+  --apihost=apihost                  whisk API host
+  --apiversion=apiversion            whisk API version
+  --cert=cert                        client cert
+  --debug=debug                      Debug level output
+  --help                             Show help
+  --key=key                          client key
+  --save                             save action code to file corresponding with action name
+  --save-as=save-as                  file to save action code to
+  --version                          Show version
 
 ALIASES
   $ aio rt:action:get
@@ -291,10 +296,10 @@ USAGE
 
 OPTIONS
   -P, --param-file=param-file  FILE containing parameter values in JSON format
-  -b, --blocking               blocking invoke
+  -f, --full                   wait for full activation record
   -i, --insecure               bypass certificate check
+  -n, --no-wait                fire and forget (asynchronous invoke, does not wait for the result)
   -p, --param=param            parameter values in KEY VALUE format
-  -r, --result                 blocking invoke; show only activation result (unless there is a failure)
   -u, --auth=auth              whisk auth
   -v, --verbose                Verbose output
   --apihost=apihost            whisk API host
@@ -389,8 +394,7 @@ OPTIONS
 
   --debug=debug                          Debug level output
 
-  --docker=docker                        [Restricted Access] use provided Docker image (a path on DockerHub) to run the
-                                         action
+  --docker=docker                        use provided Docker image (a path on DockerHub) to run the action
 
   --help                                 Show help
 
@@ -402,6 +406,9 @@ OPTIONS
 
   --main=main                            the name of the action entry point (function or fully-qualified method name
                                          when applicable)
+
+  --native                               use default skeleton runtime where code artifact provides actual executable for
+                                         the action
 
   --sequence=sequence                    treat ACTION as comma separated sequence of actions to invoke
 
@@ -456,9 +463,13 @@ USAGE
   $ aio runtime:activation:get [ACTIVATIONID]
 
 OPTIONS
-  -g, --logs               emit only the logs, stripped of time stamps and stream identifier
+  -a, --action=action      Fetch logs for a specific action
+  -g, --logs               Emit only the logs, stripped of time stamps and stream identifier
   -i, --insecure           bypass certificate check
-  -l, --last               retrieves the most recent activation
+  -l, --last               Fetch the most recent activation (default)
+  -q, --quiet              Suppress last activation information header
+  -r, --result             Emit only the result
+  -s, --skip=skip          SKIP number of activations
   -u, --auth=auth          whisk auth
   -v, --verbose            Verbose output
   --apihost=apihost        whisk API host
@@ -547,8 +558,9 @@ OPTIONS
   -a, --action=action      Fetch logs for a specific action
   -d, --deployed           Fetch logs for all actions deployed under a specific package
   -i, --insecure           bypass certificate check
-  -l, --last               retrieves the most recent activation logs
+  -l, --last               Fetch the most recent activation logs (default)
   -m, --manifest           Fetch logs for all actions in the manifest
+  -n, --limit=limit        [default: 1] Fetch the last LIMIT activation logs (up to 200)
   -o, --poll               Fetch logs continuously
   -p, --package=package    Fetch logs for a specific package in the manifest
   -r, --strip              strip timestamp information and output first line only
@@ -562,7 +574,6 @@ OPTIONS
   --debug=debug            Debug level output
   --help                   Show help
   --key=key                client key
-  --limit=limit            return the last `limit` activation logs. Max 50
   --version                Show version
 
 ALIASES
@@ -588,8 +599,12 @@ USAGE
   $ aio runtime:activation:result [ACTIVATIONID]
 
 OPTIONS
+  -a, --action=action      Fetch results for a specific action
   -i, --insecure           bypass certificate check
-  -l, --last               retrieves the most recent activation result
+  -l, --last               Fetch the most recent activation result (default)
+  -n, --limit=limit        [default: 1] Fetch the last LIMIT activation results (up to 200)
+  -q, --quiet              Suppress last activation information header
+  -s, --skip=skip          SKIP number of activations
   -u, --auth=auth          whisk auth
   -v, --verbose            Verbose output
   --apihost=apihost        whisk API host
