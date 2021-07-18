@@ -21,7 +21,7 @@ class ActivationGet extends RuntimeBaseCommand {
     const { args, flags } = this.parse(ActivationGet)
     const ow = await this.wsk()
     const filter = flags.action
-    const options = { limit: 1, skip: flags.skip }
+    const options = { limit: 1, skip: flags.skip || 0 }
     let id = args.activationId
 
     try {
