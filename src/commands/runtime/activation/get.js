@@ -45,6 +45,7 @@ class ActivationGet extends RuntimeBaseCommand {
 
       if (flags.logs) {
         const result = await ow.activations.logs(id)
+        if (result && result.logs.length === 0) result.logs = ['no logs available']
         printLogs(result, true, this.log)
       } else if (flags.result) {
         const result = await ow.activations.result(id)
